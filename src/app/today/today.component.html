@@ -6,7 +6,7 @@
 
             <div class="dark-mode-container mr-3">
                 <button class="btn btn-sm mode-switch-btn" (click)="toggleMode()">
-                    {{ isDarkMode ? 'Light Mode' : 'Dark Mode' }}
+                    {{ (isDarkMode$ | async) ? 'Light Mode' : 'Dark Mode' }}
                 </button>
             </div>
 
@@ -18,7 +18,7 @@
                            class="form-control"
                            placeholder="Search your favorite city..."
                            [(ngModel)]="cityName"
-                           (keyup.enter)="getWeatherByCity()">
+                           (keyup.enter)="searchCity()">
                 </div>
 
                 <button class="btn btn-location" (click)="getLocation()">
@@ -29,20 +29,20 @@
         </div>
 
         <!-- 🌦️ MAIN WEATHER ROW -->
-        <div class="main-row" *ngIf="weather">
+        <div class="main-row" *ngIf="weather$ | async as weather">
 
             <!-- 🟦 LEFT CARD: CITY & DATE -->
             <div class="left-card">
-                <div class="card-container main-info-card">
+                <div class="card-container main-info-card theme-polish">
                     <h4 class="city-name">{{ weather.name }}, {{ weather.sys.country }}</h4>
-                    <p class="current-time">{{ cityTimestamp | date: 'HH:mm' }}</p>
-                    <p class="current-date">{{ cityTimestamp | date: 'EEEE, MMM dd' }}</p>
+                    <p class="current-time">{{ (cityTimestamp$ | async) | date: 'HH:mm' }}</p>
+                    <p class="current-date">{{ (cityTimestamp$ | async) | date: 'EEEE, MMM dd' }}</p>
                 </div>
             </div>
 
             <!-- 🟧 RIGHT CARD: CURRENT WEATHER -->
             <div class="right-card">
-                <div class="card-container current-weather-card">
+                <div class="card-container current-weather-card theme-polish">
 
     <div class="weather-main-row">
 
@@ -90,13 +90,13 @@
         </div>
 
         <!-- BOTTOM ROW: 5-DAY + HOURLY (side-by-side) -->
-        <div class="bottom-row" *ngIf="dailyForecast.length > 0 || hourlyForecast.length > 0">
+        <div class="bottom-row" *ngIf="processedForecast$ | async as forecast">
 
-            <div class="bottom-left" *ngIf="dailyForecast.length > 0">
+            <div class="bottom-left" *ngIf="forecast.daily.length > 0">
                 <div class="card-container forecast-card">
                     <h3 class="card-title text-center">5-Day Forecast:</h3>
 
-                    <div *ngFor="let item of dailyForecast" class="day-item">
+                    <div *ngFor="let item of forecast.daily" class="day-item">
                         <img [src]="'http://openweathermap.org/img/w/' + item.weather[0].icon + '.png'" alt="icon">
                         <span class="day-temp">{{ item.main.temp | number:'1.0-0' }}°C</span>
                         <span class="day-name">{{ item.dt * 1000 | date: 'EEEE, MMM dd' }}</span>
@@ -104,12 +104,12 @@
                 </div>
             </div>
 
-            <div class="bottom-right" *ngIf="hourlyForecast.length > 0">
+            <div class="bottom-right" *ngIf="forecast.hourly.length > 0">
                 <div class="card-container forecast-card">
                     <h3 class="card-title text-center">Hourly Forecast:</h3>
 
                     <div class="hourly-grid">
-                        <div *ngFor="let hour of hourlyForecast" class="hourly-item text-center">
+                        <div *ngFor="let hour of forecast.hourly" class="hourly-item text-center">
                             <p class="hourly-time">{{ hour.dt * 1000 | date: 'HH:mm' }}</p>
                             <img [src]="'http://openweathermap.org/img/w/' + hour.weather[0].icon + '.png'" alt="icon">
                             <p class="hourly-temp">{{ hour.main.temp | number:'1.0-0' }}°C</p>
@@ -122,7 +122,7 @@
 
         </div>
 
-        <div *ngIf="!weather" class="alert alert-info text-center mt-3">
+        <div *ngIf="!(weather$ | async)" class="alert alert-info text-center mt-3">
             Loading data... Please enter a city or allow location access.
         </div>
     </div>

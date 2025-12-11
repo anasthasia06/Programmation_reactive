@@ -1,27 +1,27 @@
-// Assuming this is a component file like today.component.ts
+// src/app/today/today.component.ts
+// This component demonstrates reactive programming with RxJS:
+// - Using async pipe for automatic subscription management
+// - Observables and reactive state via BehaviorSubject
+// - Composition of multiple streams with combineLatest
+// - OnDestroy cleanup (fallback for non-observable resources)
 
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { WeatherService } from '../weather.service'; // Assuming path
-import { Subscription, interval } from 'rxjs';
-import { switchMap, startWith } from 'rxjs/operators';
-
-// Interface examples (you would define these more formally in a real project)
-interface WeatherData {
-  name: string;
-  sys: { country: string, sunrise: number, sunset: number };
-  main: { temp: number, feels_like: number, humidity: number, pressure: number };
-  weather: [{ icon: string, description: string }];
-  wind: { speed: number };
-  timezone: number;
-}
+import { WeatherService, WeatherData, ForecastData } from '../weather.service';
+import { Observable, BehaviorSubject, combineLatest, Subject, interval } from 'rxjs';
+import { map, takeUntil, startWith } from 'rxjs/operators';
 
 interface ForecastItem {
   dt: number;
   main: { temp: number };
   weather: [{ icon: string }];
   wind: { speed: number };
+}
+
+interface ProcessedForecast {
+  daily: ForecastItem[];
+  hourly: ForecastItem[];
 }
 
 @Component({
@@ -32,92 +32,104 @@ interface ForecastItem {
   styleUrls: ['./today.component.css']
 })
 export class TodayComponent implements OnInit, OnDestroy {
+  // ============ REACTIVE STATE WITH OBSERVABLES ============
+  
+  // Current city name for the search input
   cityName: string = '';
-  weather: WeatherData | null = null;
-  dailyForecast: ForecastItem[] = [];
-  hourlyForecast: ForecastItem[] = [];
-  cityTimestamp: Date = new Date();
 
-  isDarkMode: boolean = true; // Default to dark mode
+  // Observable stream of current weather data (managed by service)
+  weather$: Observable<WeatherData | null>;
 
-  private timerSubscription: Subscription | undefined;
-  private weatherSubscription: Subscription | undefined;
+  // Observable stream of processed forecast data (daily + hourly)
+  processedForecast$: Observable<ProcessedForecast>;
 
-  constructor(private weatherService: WeatherService) { }
+  // Observable for current time (updates every second)
+  cityTimestamp$: Observable<Date>;
+
+  // BehaviorSubject to manage theme state reactively
+  private isDarkModeSubject = new BehaviorSubject<boolean>(true);
+  isDarkMode$ = this.isDarkModeSubject.asObservable();
+
+  // Subject for cleanup on component destroy
+  private destroy$ = new Subject<void>();
+
+  constructor(private weatherService: WeatherService) {
+    // ============ COMPOSE MULTIPLE OBSERVABLE STREAMS ============
+
+    // 1. Get weather data from service
+    this.weather$ = this.weatherService.weather$;
+
+    // 2. Create forecast processing stream
+    // Combine forecast data with weather timezone to compute daily/hourly
+    this.processedForecast$ = combineLatest([
+      this.weatherService.forecast$,
+      this.weather$
+    ]).pipe(
+      map(([forecast, weather]) => {
+        if (!forecast || !weather) {
+          return { daily: [], hourly: [] };
+        }
+        return this.processForecast(forecast.list);
+      })
+    );
+
+    // 3. Create time update stream
+    // Use interval and combineLatest to update time reactively based on timezone
+    this.cityTimestamp$ = combineLatest([
+      interval(1000).pipe(startWith(0)), // Update every second
+      this.weather$
+    ]).pipe(
+      map(([_, weather]) => {
+        if (weather && weather.timezone) {
+          return this.calculateCityTime(weather.timezone);
+        }
+        return new Date();
+      })
+    );
+  }
 
   ngOnInit(): void {
-    // Set initial theme based on default
-    this.setTheme();
-    // Default to a location (e.g., London or use geolocation)
-    this.cityName = 'London';
-    this.getWeatherByCity();
+    // Set initial theme
+    this.applyTheme(this.isDarkModeSubject.getValue());
 
-    // Start interval to update time every minute
-    this.timerSubscription = interval(1000) // Update every second for smooth clock
-      .pipe(startWith(0))
-      .subscribe(() => {
-        if (this.weather) {
-          this.updateCityTime(this.weather.timezone);
-        } else {
-          this.cityTimestamp = new Date(); // Fallback to local time
-        }
-      });
+    // Default to London
+    this.cityName = 'London';
+    this.searchCity();
   }
 
   ngOnDestroy(): void {
-    if (this.timerSubscription) {
-      this.timerSubscription.unsubscribe();
-    }
-    if (this.weatherSubscription) {
-      this.weatherSubscription.unsubscribe();
-    }
+    // Complete the destroy subject to unsubscribe all observables using takeUntil
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  // --- Theme Management ---
-  setTheme(): void {
-    document.body.className = this.isDarkMode ? 'dark-theme' : 'light-theme';
+  // ============ THEME MANAGEMENT (REACTIVE) ============
+
+  private applyTheme(isDark: boolean): void {
+    document.body.className = isDark ? 'dark-theme' : 'light-theme';
   }
 
   toggleMode(): void {
-    this.isDarkMode = !this.isDarkMode;
-    this.setTheme();
+    const newMode = !this.isDarkModeSubject.getValue();
+    this.isDarkModeSubject.next(newMode);
+    this.applyTheme(newMode);
   }
 
-  // --- Time Management ---
-  updateCityTime(timezoneOffsetSeconds: number): void {
-    const localTime = new Date();
-    // Calculate UTC time in milliseconds
-    const utcTime = localTime.getTime() + (localTime.getTimezoneOffset() * 60000);
-    // Apply city's timezone offset
-    this.cityTimestamp = new Date(utcTime + (timezoneOffsetSeconds * 1000));
+  // ============ REACTIVE SEARCH METHODS ============
+
+  // Search by city name - delegates to service which handles it reactively
+  searchCity(): void {
+    if (!this.cityName.trim()) return;
+    this.weatherService.searchByCity(this.cityName);
   }
 
-  // --- Weather Retrieval ---
-  getWeatherByCity(): void {
-    if (!this.cityName) return;
-
-    this.weatherSubscription = this.weatherService.getWeatherDataByCityName(this.cityName)
-      .subscribe({
-        next: (response) => {
-          this.weather = response;
-          this.updateCityTime(response.timezone);
-          this.getForecast(response.coord.lat, response.coord.lon);
-        },
-        error: (error) => {
-          console.error('Error fetching weather data:', error);
-          this.weather = null; // Clear data on error
-          alert('City not found or API error. Please try again.');
-        }
-      });
-  }
-
+  // Get geolocation and search by coordinates - delegates to service
   getLocation(): void {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const lat = position.coords.latitude;
-          const lon = position.coords.longitude;
-          this.getWeatherByCoords(lat, lon);
+          const { latitude, longitude } = position.coords;
+          this.weatherService.searchByCoords(latitude, longitude);
         },
         (error) => {
           console.error('Geolocation error:', error);
@@ -129,39 +141,15 @@ export class TodayComponent implements OnInit, OnDestroy {
     }
   }
 
-  getWeatherByCoords(lat: number, lon: number): void {
-    this.weatherSubscription = this.weatherService.getWeatherDataByCoords(lat, lon)
-      .subscribe({
-        next: (response) => {
-          this.weather = response;
-          this.cityName = response.name; // Update search bar with city name
-          this.updateCityTime(response.timezone);
-          this.getForecast(lat, lon);
-        },
-        error: (error) => {
-          console.error('Error fetching weather data by coords:', error);
-          this.weather = null;
-          alert('Could not fetch weather data for your location.');
-        }
-      });
-  }
+  // ============ DATA PROCESSING METHODS ============
 
-  // --- Forecast Processing ---
-  getForecast(lat: number, lon: number): void {
-    this.weatherService.getForecastDataByCoords(lat, lon)
-      .subscribe({
-        next: (response: any) => {
-          this.processForecast(response.list);
-        },
-        error: (error) => {
-          console.error('Error fetching forecast data:', error);
-        }
-      });
-  }
-
-  processForecast(list: any[]): void {
+  /**
+   * Process forecast list into daily (5-day) and hourly (next 8 hours)
+   * This demonstrates data transformation within observable streams
+   */
+  private processForecast(list: any[]): ProcessedForecast {
     const dailyMap = new Map<string, ForecastItem>();
-    this.hourlyForecast = [];
+    const hourlyForecast: ForecastItem[] = [];
 
     const now = new Date();
     let hourlyCount = 0;
@@ -170,22 +158,31 @@ export class TodayComponent implements OnInit, OnDestroy {
       const date = new Date(item.dt * 1000);
       const dateString = date.toISOString().split('T')[0];
 
-      // 1. Process 5-Day Forecast (one entry per day, e.g., noon forecast)
-      // Check if we already have a forecast for this day.
-      // We take the forecast closest to noon (12:00) if possible.
+      // Daily forecast: one entry per day (first occurrence for that day)
       if (!dailyMap.has(dateString)) {
-         dailyMap.set(dateString, item);
+        dailyMap.set(dateString, item);
       }
 
-      // 2. Process Hourly Forecast (for the current day and upcoming hours)
-      // Display the next 8 hourly forecasts
+      // Hourly forecast: next 8 hours after now
       if (date.getTime() > now.getTime() && hourlyCount < 8) {
-        this.hourlyForecast.push(item);
+        hourlyForecast.push(item);
         hourlyCount++;
       }
     }
 
-    // Convert map values to array for the daily forecast
-    this.dailyForecast = Array.from(dailyMap.values()).slice(0, 5);
+    return {
+      daily: Array.from(dailyMap.values()).slice(0, 5),
+      hourly: hourlyForecast
+    };
+  }
+
+  /**
+   * Calculate current time in a given timezone
+   */
+  private calculateCityTime(timezoneOffsetSeconds: number): Date {
+    const localTime = new Date();
+    const utcTime = localTime.getTime() + (localTime.getTimezoneOffset() * 60000);
+    return new Date(utcTime + (timezoneOffsetSeconds * 1000));
   }
 }
+
