@@ -13,36 +13,36 @@ export class WeatherService {
 
   constructor(private http: HttpClient) {}
 
-  // 1. Recherche par coordonnées (Météo actuelle)
+  // 1. Search by Coordinates (Current Weather)
   getWeatherDataByCoords(lat: number, lon: number): Observable<any> {
     let params = new HttpParams()
       .set('lat', lat)
       .set('lon', lon)
-      .set('units', 'metric') // <-- CHANGEMENT ICI (metric = Celsius)
+      .set('units', 'metric') // <-- CHANGE HERE (metric = Celsius)
       .set('appid', this.apiKey);
 
     return this.http.get(this.url, { params });
   }
 
-  // 2. Recherche par nom de ville (Météo actuelle)
+  // 2. Search by City Name (Current Weather)
   getWeatherDataByCityName(cityName: string): Observable<any> {
     let params = new HttpParams()
       .set('q', cityName)
-      .set('units', 'metric') // <-- CHANGEMENT ICI (metric = Celsius)
+      .set('units', 'metric') // <-- CHANGE HERE (metric = Celsius)
       .set('appid', this.apiKey);
 
     return this.http.get(this.url, { params });
   }
 
-  // 3. Récupère la prévision pour 5 jours/3 heures
+  // 3. Retrieves 5-day/3-hour forecast
   getForecastDataByCoords(lat: number, lon: number): Observable<any> {
     let params = new HttpParams()
       .set('lat', lat)
       .set('lon', lon)
-      .set('units', 'metric') // <-- CHANGEMENT ICI (metric = Celsius)
+      .set('units', 'metric') // <-- CHANGE HERE (metric = Celsius)
       .set('appid', this.apiKey);
 
-    // Endpoint pour les prévisions
+    // Endpoint for forecast
     return this.http.get('https://api.openweathermap.org/data/2.5/forecast', { params });
   }
 }

@@ -1,32 +1,32 @@
 /* src/styles.css */
 
-/* --- DÉFINITION DES THÈMES GLOBALES --- */
+/* --- GLOBAL THEME DEFINITION --- */
 body {
     transition: background-color 0.3s, color 0.3s;
     font-family: Arial, sans-serif;
 }
 
-/* Thème Sombre */
+/* Dark Theme */
 body.dark-theme {
-    --bg-color: #242424; /* Fond d'écran sombre */
-    --card-bg-color: #383838; /* Fond des cartes */
+    --bg-color: #242424; /* Dark background */
+    --card-bg-color: #383838; /* Card background */
     --text-color: #ffffff;
     --shadow-color: rgba(0, 0, 0, 0.4);
-    --accent-color: #ffd700; /* Jaune or pour l'accentuation */
-    --secondary-bg: #4a4a4a; /* Fond pour les éléments de détails */
+    --accent-color: #ffd700; /* Gold yellow for accentuation */
+    --secondary-bg: #4a4a4a; /* Background for detail elements */
 }
 
-/* Thème Clair */
+/* Light Theme */
 body.light-theme {
-    --bg-color: #f0f0f0; /* Fond d'écran clair */
+    --bg-color: #f0f0f0; /* Light background */
     --card-bg-color: #ffffff;
     --text-color: #343a40;
     --shadow-color: rgba(0, 0, 0, 0.15);
-    --accent-color: #FFA500; /* Orange pour l'accentuation */
+    --accent-color: #FFA500; /* Orange for accentuation */
     --secondary-bg: #e9ecef;
 }
 
-/* Applique le thème par défaut pour la transition */
+/* Apply default theme for transition */
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
