@@ -330,77 +330,443 @@
     margin-top: 5px;
 }
 
-/* ------------------------------------------- */
-/* 5. GRAPH VIEW FOR 5-DAY FORECAST */
-/* ------------------------------------------- */
 
-.btn-toggle {
-    background-color: var(--accent-color);
-    color: white;
-    border: none;
-    border-radius: 20px;
-    padding: 5px 15px;
-    font-size: 0.9rem;
-    transition: background-color 0.3s;
+.main-row {
+    display: flex;
+    gap: 8px; /* smaller gap to compact layout */
+    margin-bottom: 12px; /* reduced bottom margin */
+    flex-wrap: wrap; /* allow cards to wrap on narrow screens */
+    align-items: stretch; /* make cards same height when possible */
+}
+.left-card {
+    /* Make the left top card a bit narrower; do NOT allow the right card to grow to compensate */
+    flex: 0 1 36%;
+    max-width: 36%;
+    min-width: 260px;
+}
+.right-card {
+    /* Make the right top card wider so its visual height matches the left card */
+    flex: 0 1 60%;
+    max-width: 60%;
+    min-width: 360px;
 }
 
-.btn-toggle:hover {
-    background-color: color-mix(in srgb, var(--accent-color) 80%, black);
+/* Ensure both card wrappers stretch to the same height */
+.left-card, .right-card {
+    display: flex;
+    flex-direction: column;
 }
 
-.graph-view {
-    padding: 10px 0;
+/* Make the inner card container fill the wrapper so both cards match height */
+.left-card > .card-container,
+.right-card > .card-container {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* center content vertically like the mockup */
 }
 
-.temp-graph {
-    width: 100%;
-    height: 320px;
+/* STYLE HORIZONTAL DU BLOC METEO */
+.horizontal-weather {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.weather-right {
+  text-align: center;
+}
+
+.weather-icon-large {
+  width: 90px;
+}
+
+/* Cartes */
+.card-container {
+    background: var(--card-bg-color, #2e2e2e);
+    padding: 18px; /* harmonize main padding */
+    border-radius: 14px;
+    color: var(--text-color, #fff);
+    box-shadow: 0px 10px 30px rgba(0,0,0,0.45);
+}
+.weather-main-row {
+  display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0 0 0;
+    gap: 40px;
+}
+
+.temp-column {
+  flex: 1;
+}
+
+.icon-column {
+    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.temp-graph-svg {
-    width: 100%;
-    height: 100%;
-    max-width: 500px;
-}
-
-.grid-line {
-    stroke: var(--secondary-bg);
-    stroke-width: 1;
-    opacity: 0.3;
-}
-
-.temp-curve {
-    stroke: var(--accent-color);
-    stroke-width: 3;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-
-.data-point {
-    fill: var(--accent-color);
-    stroke: var(--card-bg-color);
-    stroke-width: 2;
-    transition: r 0.3s;
-}
-
-.data-point:hover {
-    r: 8;
-}
-
-.temp-label {
-    fill: var(--text-color);
+.details-column {
+    flex: 1;
     font-size: 14px;
-    font-weight: 600;
-    text-anchor: middle;
+    line-height: 1.6;
+    text-align: right; /* details aligned to the right like the reference */
 }
 
-.day-label-svg {
-    fill: var(--text-color);
-    font-size: 12px;
-    text-anchor: middle;
-    font-weight: 500;
+.temp-value {
+    font-size: 56px;
+    font-weight: 800;
+    color: var(--accent-color, #ffcc00);
+    text-align: center;
 }
+
+.description-text {
+  text-transform: capitalize;
+  margin-top: 5px;
+  opacity: .8;
+}
+
+.weather-icon-large {
+  width: 90px;
+}
+
+.sun-times-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding-top: 18px;
+}
+
+.sun-item {
+    text-align: center;
+    width: 45%;
+}
+
+/* Make the left card content vertically centered like the mockup */
+.main-info-card {
+    padding: 28px 16px; /* reduce vertical padding */
+}
+
+/* Small responsive tweak: on very small screens keep full width */
+@media (max-width: 720px) {
+    .left-card, .right-card {
+        flex: 0 1 100%;
+        max-width: 100%;
+    }
+    .search-location-group { max-width: 95%; }
+}
+
+/* Bottom row styles for 5-day + hourly side-by-side */
+.bottom-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+    flex-wrap: nowrap; /* keep bottom blocks on the same row */
+    align-items: stretch;
+    width: 100%;
+}
+.bottom-left,
+.bottom-right {
+    display: flex;
+    flex-direction: column;
+}
+.bottom-left {
+    /* match proportion with top-left card so bottom row equals top row width */
+    flex: 0 1 36%;
+    max-width: 36%;
+    min-width: 220px;
+}
+.bottom-right {
+    /* match proportion with top-right card so bottom row equals top row width */
+    flex: 0 1 60%;
+    max-width: 60%;
+    min-width: 360px;
+}
+.bottom-left > .card-container,
+.bottom-right > .card-container {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Center the 5-day list inside its card and make items larger but constrained */
+.bottom-left > .card-container {
+    align-items: stretch;
+}
+.bottom-left .day-item {
+    width: 100%;
+    padding: 8px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.bottom-left .day-item img {
+    width: 30px;
+    margin-right: 15px;
+    flex: 0 0 auto;
+}
+.bottom-left .day-temp {
+    font-weight: 600;
+    color: var(--accent-color);
+    flex-grow: 1;
+    text-align: left;
+}
+.bottom-left .day-name {
+    min-width: 110px;
+    font-size: 0.95rem;
+    text-align: right;
+}
+
+/* Bottom-right: center its contents so hourly forecast appears centered in the card */
+.bottom-right > .card-container {
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Slightly enlarge elements inside the bottom-left (5-day) forecast
+   so items are more prominent but still fit inside the card. */
+.bottom-left .day-item {
+    padding: 10px 0; /* a bit more vertical breathing room */
+}
+.bottom-left .day-item img {
+    width: 36px; /* slightly larger icons */
+    margin-right: 12px;
+}
+.bottom-left .day-temp {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    margin-right: 8px;
+}
+.bottom-left .day-name {
+    min-width: 120px;
+    font-size: 0.95rem;
+}
+
+@media (max-width: 720px) {
+    .bottom-left, .bottom-right {
+        flex: 0 1 100%;
+        max-width: 100%;
+    }
+}
+
+/* Center the main block group vertically & horizontally on large viewports */
+@media (min-width: 992px) {
+    .row.justify-content-center {
+        display: flex;
+        justify-content: center; /* already present but ensure */
+        align-items: center; /* vertical center */
+        min-height: calc(100vh - 120px); /* leave room for top controls */
+    }
+    /* ensure the inner column remains centered with side gutters */
+    .col-12.col-lg-10 {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Ensure top and bottom card containers share the same minimum height
+       on wide screens regardless of viewport height. This prevents the
+       bottom row from appearing shorter when the earlier min-height-based
+       media query doesn't match. */
+    .main-row > .left-card > .card-container,
+    .main-row > .right-card > .card-container,
+    .bottom-left > .card-container,
+    .bottom-right > .card-container {
+        min-height: 380px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+}
+
+/* Desktop: prefer natural heights to avoid clipping of card content */
+@media (min-width: 992px) and (min-height: 760px) {
+    /* main centered column that holds control-bar + content */
+
+    .col-12.col-lg-10 {
+        display: flex;
+        flex-direction: column;
+        /* allow natural height so cards are not clipped */
+        height: auto;
+        justify-content: flex-start;
+        overflow: visible; /* keep normal page scrolling */
+    }
+
+    /* let rows size naturally; avoid fixed flex-basis that clips content */
+    .main-row {
+        flex: 0 0 auto;
+        min-height: 0; /* allow inner flex children to shrink correctly */
+        overflow: visible;
+        align-items: stretch;
+    }
+
+    .bottom-row {
+        flex: 0 0 auto;
+        min-height: 0;
+        overflow: visible;
+    }
+
+    /* let card containers use flex to match heights without forcing 100% height */
+    .main-row > .left-card > .card-container,
+    .main-row > .right-card > .card-container,
+    .bottom-left > .card-container,
+    .bottom-right > .card-container {
+        box-sizing: border-box;
+        /* keep flex behavior so shorter card stretches to match taller sibling */
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    /* Ensure the two top cards have the same visual height on desktop */
+    .main-row > .left-card > .card-container,
+    .main-row > .right-card > .card-container {
+        min-height: 380px; /* tuned to match the larger of the two cards */
+    }
+
+    /* Make bottom cards match the top row height so both rows visually align */
+    .bottom-left > .card-container,
+    .bottom-right > .card-container {
+        min-height: 380px;
+        padding-top: 22px;
+        padding-bottom: 22px;
+    }
+
+    /* make hourly area horizontally scrollable only */
+    .hourly-grid {
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-bottom: 8px;
+    }
+}
+
+/* Further scale down internal elements on desktop when fitting to viewport */
+@media (min-width: 992px) and (min-height: 720px) {
+    /* reduce padding inside card containers in the constrained layout */
+    .main-row > .left-card > .card-container,
+    .main-row > .right-card > .card-container {
+        padding: 18px 14px;
+    }
+
+    /* left card: reduce city/time sizes so it fits fully */
+    .main-info-card.theme-polish .city-name {
+        font-size: 1.15rem;
+    }
+    .main-info-card.theme-polish .current-time {
+        font-size: 3rem; /* smaller than before so it doesn't overflow */
+    }
+    .main-info-card.theme-polish .current-date {
+        font-size: 0.9rem;
+    }
+
+    /* right card: reduce temperature and icon to fit */
+    .current-weather-card.theme-polish .temp-value {
+        font-size: 36px;
+    }
+    .current-weather-card.theme-polish .weather-icon-large {
+        width: 72px;
+        height: 72px;
+    }
+    .current-weather-card.theme-polish .details-column > div {
+        min-width: 110px;
+        padding: 6px 10px;
+        font-size: 0.9rem;
+    }
+
+    /* reduce sun-times font and spacing */
+    .current-weather-card.theme-polish .sun-item p { margin: 4px 0; }
+    .current-weather-card.theme-polish .sun-time { font-size: 1rem; }
+
+    /* bottom-left: compact rows */
+    .bottom-left .day-item { padding: 6px 0; }
+    .bottom-left .day-item .day-temp { font-size: 0.95rem; }
+    .bottom-left .day-item .day-name { min-width: 90px; font-size: 0.9rem; }
+
+    /* hourly: smaller cards */
+    .hourly-item { min-width: 68px; padding: 8px 6px; }
+    .hourly-item img { width: 36px; height: 36px; }
+    .hourly-temp { font-size: 1rem; }
+    .hourly-time { font-size: 0.85rem; }
+
+    /* reduce gaps slightly */
+    .bottom-row { gap: 10px; }
+    .main-row { gap: 10px; }
+}
+
+.sun-time {
+  font-weight: bold;
+  color: #ffcc00;
+}
+
+/* ===== Overrides & visual polish for top two cards ===== */
+/* stronger subtle gradient, smoother shadow */
+.card-container.theme-polish {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0)) , var(--card-bg-color, #2e2e2e);
+    box-shadow: 0 14px 30px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.02);
+    padding: 20px; /* reduced so top cards don't exceed bottom height */
+    border-radius: 16px;
+}
+
+/* Left main info: larger time, balanced spacing */
+.main-info-card.theme-polish {
+    padding: 20px 12px; /* reduced to match overall compactness */
+    gap: 10px;
+}
+.main-info-card.theme-polish .city-name {
+    font-size: 1.35rem;
+    letter-spacing: 0.2px;
+    opacity: 0.95;
+}
+.main-info-card.theme-polish .current-time {
+    font-size: 3.6rem; /* reduced so page fits vertically */
+    font-weight: 900;
+    color: var(--accent-color);
+    line-height: 1;
+}
+.main-info-card.theme-polish .current-date {
+    font-size: 0.95rem;
+    opacity: 0.7;
+}
+
+/* Right weather card: larger icon, neat stat chips on the right */
+.current-weather-card.theme-polish {
+    padding: 18px 20px 14px 20px;
+}
+.current-weather-card.theme-polish .weather-main-row { gap: 18px; }
+.current-weather-card.theme-polish .temp-column { align-items: flex-start; }
+.current-weather-card.theme-polish .temp-value { font-size: 44px; }
+.current-weather-card.theme-polish .description-text { margin-top: 6px; }
+.current-weather-card.theme-polish .weather-icon-large { width: 96px; height: 96px; }
+
+/* Stylized stat chips in the right column */
+.current-weather-card.theme-polish .details-column {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-end;
+}
+.current-weather-card.theme-polish .details-column > div {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.02);
+    min-width: 150px;
+    justify-content: flex-end;
+}
+.current-weather-card.theme-polish .details-column > div img,
+.current-weather-card.theme-polish .details-column > div svg { width: 20px; height: 20px; }
+.current-weather-card.theme-polish .details-column > div span { font-size: 0.95rem; }
+
+/* sun times separator & layout polish */
+.current-weather-card.theme-polish .sun-times-row { padding-top: 22px; }
+.current-weather-card.theme-polish .sun-item { width: 48%; }
+
+/* utility: apply theme-polish to the DOM roots in HTML by adding class names to card-container elements */
 
