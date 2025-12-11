@@ -1,13 +1,15 @@
 // src/app/weather.service.ts
 // This service demonstrates RxJS reactive patterns:
 // - BehaviorSubject for reactive state management
-// - Operators: map, filter, shareReplay, catchError
+// - Operators: map, filter, shareReplay, catchError, takeUntil, finalize
 // - Composition of multiple observable streams
+// - HTTP request CANCELLATION via unsubscribe() and takeUntil()
+// - Loading state management for request progress
 
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject, Subject } from 'rxjs';
-import { map, shareReplay, catchError, debounceTime, distinctUntilChanged, switchMap, filter } from 'rxjs/operators';
+import { map, shareReplay, catchError, debounceTime, distinctUntilChanged, switchMap, filter, takeUntil, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 export interface WeatherData {
@@ -27,7 +29,7 @@ export interface ForecastData {
 @Injectable({
   providedIn: 'root',
 })
-export class WeatherService {
+export class WeatherService implements OnDestroy {
   private readonly url = 'https://api.openweathermap.org/data/2.5/weather';
   private readonly forecastUrl = 'https://api.openweathermap.org/data/2.5/forecast';
   private readonly apiKey = 'a6ecc4e3bda67682ff663828ad8521f3';
@@ -40,6 +42,10 @@ export class WeatherService {
   // BehaviorSubject for forecast data
   private forecastSubject = new BehaviorSubject<ForecastData | null>(null);
   public forecast$ = this.forecastSubject.asObservable();
+
+  // 🔄 LOADING STATE: BehaviorSubject to track HTTP request progress
+  private loadingSubject = new BehaviorSubject<boolean>(false);
+  public loading$ = this.loadingSubject.asObservable();
 
   // Subject for city search input (will be used with debounceTime)
   private citySearchSubject = new Subject<string>();
@@ -55,24 +61,37 @@ export class WeatherService {
     distinctUntilChanged((prev, curr) => prev.lat === curr.lat && prev.lon === curr.lon)
   );
 
+  // 🔪 CANCELLATION: Subject to trigger cleanup of all active subscriptions
+  private destroy$ = new Subject<void>();
+
   constructor(private http: HttpClient) {
     this.setupReactiveStreams();
   }
 
   // ============ SETUP REACTIVE STREAMS ============
-  // This demonstrates composition of multiple observables using RxJS operators
+  // This demonstrates:
+  // 1. Composition of observables using RxJS operators
+  // 2. HTTP request CANCELLATION via takeUntil()
+  // 3. Loading state management via finalize()
   private setupReactiveStreams(): void {
     // When city search changes, fetch weather data
     this.citySearch$
       .pipe(
-        switchMap((city: string) => this.getWeatherDataByCityName(city).pipe(
-          catchError(error => {
-            console.error('Error fetching weather for city:', error);
-            return of(null);
-          })
-        )),
+        switchMap((city: string) => {
+          this.loadingSubject.next(true); // 🔄 START loading
+          return this.getWeatherDataByCityName(city).pipe(
+            // finalize: ALWAYS runs (success or error) - perfect for cleanup
+            finalize(() => this.loadingSubject.next(false)), // 🔄 STOP loading
+            catchError(error => {
+              console.error('Error fetching weather for city:', error);
+              return of(null);
+            })
+          );
+        }),
         // Only emit non-null weather data
-        filter((data: WeatherData | null) => data !== null)
+        filter((data: WeatherData | null) => data !== null),
+        // 🔪 CANCELLATION: takeUntil will automatically unsubscribe and CANCEL pending HTTP requests
+        takeUntil(this.destroy$)
       )
       .subscribe((weather: any) => {
         this.weatherSubject.next(weather as WeatherData);
@@ -85,13 +104,19 @@ export class WeatherService {
     // When coordinates change, fetch weather data
     this.coordsSearch$
       .pipe(
-        switchMap(coords => this.getWeatherDataByCoords(coords.lat, coords.lon).pipe(
-          catchError(error => {
-            console.error('Error fetching weather for coords:', error);
-            return of(null);
-          })
-        )),
-        filter((data: WeatherData | null) => data !== null)
+        switchMap(coords => {
+          this.loadingSubject.next(true); // 🔄 START loading
+          return this.getWeatherDataByCoords(coords.lat, coords.lon).pipe(
+            finalize(() => this.loadingSubject.next(false)), // 🔄 STOP loading
+            catchError(error => {
+              console.error('Error fetching weather for coords:', error);
+              return of(null);
+            })
+          );
+        }),
+        filter((data: WeatherData | null) => data !== null),
+        // 🔪 CANCELLATION: takeUntil will automatically unsubscribe and CANCEL pending HTTP requests
+        takeUntil(this.destroy$)
       )
       .subscribe((weather: any) => {
         this.weatherSubject.next(weather as WeatherData);
@@ -203,6 +228,15 @@ export class WeatherService {
 
   getCurrentForecast(): ForecastData | null {
     return this.forecastSubject.getValue();
+  }
+
+  // ============ LIFECYCLE CLEANUP ============
+  // 🔪 CANCELLATION PATTERN: Implement OnDestroy to automatically cancel all pending HTTP requests
+  // When service is destroyed, destroy$ emits, triggering takeUntil() on all subscriptions
+  ngOnDestroy(): void {
+    console.log('WeatherService destroyed - cancelling all pending HTTP requests');
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
 

@@ -33,7 +33,7 @@ interface ProcessedForecast {
 })
 export class TodayComponent implements OnInit, OnDestroy {
   // ============ REACTIVE STATE WITH OBSERVABLES ============
-  
+
   // Current city name for the search input
   cityName: string = '';
 
@@ -45,6 +45,9 @@ export class TodayComponent implements OnInit, OnDestroy {
 
   // Observable for current time (updates every second)
   cityTimestamp$: Observable<Date>;
+
+  // 🔄 Loading state: Observable for HTTP request progress
+  loading$: Observable<boolean>;
 
   // BehaviorSubject to manage theme state reactively
   private isDarkModeSubject = new BehaviorSubject<boolean>(true);
@@ -86,6 +89,9 @@ export class TodayComponent implements OnInit, OnDestroy {
         return new Date();
       })
     );
+
+    // 🔄 4. Get loading state from service
+    this.loading$ = this.weatherService.loading$;
   }
 
   ngOnInit(): void {

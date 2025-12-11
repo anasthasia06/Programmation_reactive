@@ -1,6 +1,12 @@
 <div class="row justify-content-center">
     <div class="col-12 col-lg-10">
 
+        <!-- 🔄 LOADING INDICATOR - Shows HTTP request progress -->
+        <div *ngIf="loading$ | async" class="alert alert-warning alert-loading text-center mb-3">
+            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            Loading weather data...
+        </div>
+
         <!-- 🔍 SEARCH + DARK MODE BAR -->
         <div class="d-flex align-items-center justify-content-center mb-4 control-bar">
 
