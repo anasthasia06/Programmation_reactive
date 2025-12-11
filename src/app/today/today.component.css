@@ -36,14 +36,18 @@
 
 /* NEW CONTAINER FOR SEARCH/LOCATION GROUP */
 .search-location-group {
-    max-width: 650px;
+    display: flex;
+    justify-content: center;
+    margin-inline: 25%;
+    max-width: 50%;
+    margin-block: 10vh;
 }
 
 .search-bar {
-    /* KEY FIX: Remove right border to stick to the green button */
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-
+    border-top-left-radius: 25px;
+    border-bottom-left-radius: 25px;
+    padding-left: 15px;
+    padding-right: 0;
     flex-grow: 1;
     height: 45px;
 
@@ -70,11 +74,14 @@
 }
 
 .btn-location {
+    max-width: 150px;
     background-color: #4CAF50;
     border: none;
     color: white;
     font-weight: 600;
     padding: 10px 15px;
+    flex-grow: 1;
+    height: 45px;
 
     /* KEY FIX: Remove left border to stick to the search bar */
     border-top-left-radius: 0;
