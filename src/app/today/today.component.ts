@@ -36,18 +36,63 @@ export class TodayComponent implements OnInit, OnDestroy {
 
   // Current city name for the search input
   cityName: string = '';
-  weather: WeatherData | null = null;
-  dailyForecast: ForecastItem[] = [];
-  hourlyForecast: ForecastItem[] = [];
-  cityTimestamp: Date = new Date();
 
-  isDarkMode: boolean = true; // Default to dark mode
-  isGraphView: boolean = false; // Default to card view for 5-day forecast
+  // Observable stream of current weather data (managed by service)
+  weather$: Observable<WeatherData | null>;
 
-  private timerSubscription: Subscription | undefined;
-  private weatherSubscription: Subscription | undefined;
+  // Observable stream of processed forecast data (daily + hourly)
+  processedForecast$: Observable<ProcessedForecast>;
 
-  constructor(private weatherService: WeatherService) { }
+  // Observable for current time (updates every second)
+  cityTimestamp$: Observable<Date>;
+
+  // 🔄 Loading state: Observable for HTTP request progress
+  loading$: Observable<boolean>;
+
+  // BehaviorSubject to manage theme state reactively
+  private isDarkModeSubject = new BehaviorSubject<boolean>(true);
+  isDarkMode$ = this.isDarkModeSubject.asObservable();
+
+  // Subject for cleanup on component destroy
+  private destroy$ = new Subject<void>();
+
+  constructor(private weatherService: WeatherService) {
+    // ============ COMPOSE MULTIPLE OBSERVABLE STREAMS ============
+
+    // 1. Get weather data from service
+    this.weather$ = this.weatherService.weather$;
+
+    // 2. Create forecast processing stream
+    // Combine forecast data with weather timezone to compute daily/hourly
+    this.processedForecast$ = combineLatest([
+      this.weatherService.forecast$,
+      this.weather$
+    ]).pipe(
+      map(([forecast, weather]) => {
+        if (!forecast || !weather) {
+          return { daily: [], hourly: [] };
+        }
+        return this.processForecast(forecast.list);
+      })
+    );
+
+    // 3. Create time update stream
+    // Use interval and combineLatest to update time reactively based on timezone
+    this.cityTimestamp$ = combineLatest([
+      interval(1000).pipe(startWith(0)), // Update every second
+      this.weather$
+    ]).pipe(
+      map(([_, weather]) => {
+        if (weather && weather.timezone) {
+          return this.calculateCityTime(weather.timezone);
+        }
+        return new Date();
+      })
+    );
+
+    // 🔄 4. Get loading state from service
+    this.loading$ = this.weatherService.loading$;
+  }
 
   ngOnInit(): void {
     // Set initial theme
@@ -71,69 +116,20 @@ export class TodayComponent implements OnInit, OnDestroy {
   }
 
   toggleMode(): void {
-    this.isDarkMode = !this.isDarkMode;
-    this.setTheme();
+    const newMode = !this.isDarkModeSubject.getValue();
+    this.isDarkModeSubject.next(newMode);
+    this.applyTheme(newMode);
   }
 
-  toggleForecastView(): void {
-    this.isGraphView = !this.isGraphView;
+  // ============ REACTIVE SEARCH METHODS ============
+
+  // Search by city name - delegates to service which handles it reactively
+  searchCity(): void {
+    if (!this.cityName.trim()) return;
+    this.weatherService.searchByCity(this.cityName);
   }
 
-  getMaxTemp(): number {
-    if (this.dailyForecast.length === 0) return 30;
-    return Math.max(...this.dailyForecast.map(item => item.main.temp));
-  }
-
-  getMinTemp(): number {
-    if (this.dailyForecast.length === 0) return 0;
-    return Math.min(...this.dailyForecast.map(item => item.main.temp));
-  }
-
-  getYPosition(temp: number): number {
-    const maxTemp = this.getMaxTemp();
-    const minTemp = this.getMinTemp();
-    const range = maxTemp - minTemp || 10; // Avoid division by zero
-    // Map temperature to Y coordinate (50 to 250, inverted because SVG Y grows downward)
-    return 250 - ((temp - minTemp) / range * 200);
-  }
-
-  getGraphPoints(): string {
-    if (this.dailyForecast.length === 0) return '';
-    return this.dailyForecast.map((item, index) => {
-      const x = 50 + index * 100;
-      const y = this.getYPosition(item.main.temp);
-      return `${x},${y}`;
-    }).join(' ');
-  }
-
-  // --- Time Management ---
-  updateCityTime(timezoneOffsetSeconds: number): void {
-    const localTime = new Date();
-    // Calculate UTC time in milliseconds
-    const utcTime = localTime.getTime() + (localTime.getTimezoneOffset() * 60000);
-    // Apply city's timezone offset
-    this.cityTimestamp = new Date(utcTime + (timezoneOffsetSeconds * 1000));
-  }
-
-  // --- Weather Retrieval ---
-  getWeatherByCity(): void {
-    if (!this.cityName) return;
-
-    this.weatherSubscription = this.weatherService.getWeatherDataByCityName(this.cityName)
-      .subscribe({
-        next: (response) => {
-          this.weather = response;
-          this.updateCityTime(response.timezone);
-          this.getForecast(response.coord.lat, response.coord.lon);
-        },
-        error: (error) => {
-          console.error('Error fetching weather data:', error);
-          this.weather = null; // Clear data on error
-          alert('City not found or API error. Please try again.');
-        }
-      });
-  }
-
+  // Get geolocation and search by coordinates - delegates to service
   getLocation(): void {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
