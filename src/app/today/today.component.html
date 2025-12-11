@@ -82,12 +82,85 @@
 
             <div class="col-12 col-md-6 mb-4" *ngIf="dailyForecast.length > 0">
                 <div class="card-container forecast-card">
-                    <h3 class="card-title">5-Day Forecast:</h3>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="card-title mb-0">5-Day Forecast:</h3>
+                        <button class="btn btn-sm btn-toggle" (click)="toggleForecastView()">
+                            {{ isGraphView ? '📊 Card View' : '📈 Graph View' }}
+                        </button>
+                    </div>
 
-                    <div *ngFor="let item of dailyForecast" class="day-item">
-                        <img [src]="'http://openweathermap.org/img/w/' + item.weather[0].icon + '.png'" alt="icon">
-                        <span class="day-temp">{{ item.main.temp | number:'1.0-0' }}°C</span>
-                        <span class="day-name">{{ item.dt * 1000 | date: 'EEEE, MMM dd' }}</span>
+                    <!-- Card View -->
+                    <div *ngIf="!isGraphView">
+                        <div *ngFor="let item of dailyForecast" class="day-item">
+                            <img [src]="'http://openweathermap.org/img/w/' + item.weather[0].icon + '.png'" alt="icon">
+                            <span class="day-temp">{{ item.main.temp | number:'1.0-0' }}°C</span>
+                            <span class="day-name">{{ item.dt * 1000 | date: 'EEEE, MMM dd' }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Graph View -->
+                    <div *ngIf="isGraphView" class="graph-view">
+                        <div class="temp-graph">
+                            <svg class="temp-graph-svg" viewBox="0 0 500 320" preserveAspectRatio="xMidYMid meet">
+                                <!-- Grid lines -->
+                                <line *ngFor="let i of [0, 1, 2, 3, 4]" 
+                                      [attr.x1]="0" 
+                                      [attr.y1]="50 + i * 40" 
+                                      [attr.x2]="500" 
+                                      [attr.y2]="50 + i * 40" 
+                                      class="grid-line" />
+                                
+                                <!-- Temperature curve -->
+                                <polyline 
+                                    [attr.points]="getGraphPoints()" 
+                                    class="temp-curve" 
+                                    fill="none" />
+                                
+                                <!-- Gradient fill under curve -->
+                                <defs>
+                                    <linearGradient id="tempGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" style="stop-color:var(--accent-color);stop-opacity:0.3" />
+                                        <stop offset="100%" style="stop-color:var(--accent-color);stop-opacity:0.05" />
+                                    </linearGradient>
+                                </defs>
+                                <polygon 
+                                    [attr.points]="getGraphPoints() + ' 500,250 0,250'" 
+                                    fill="url(#tempGradient)" />
+                                
+                                <!-- Data points -->
+                                <g *ngFor="let item of dailyForecast; let i = index">
+                                    <circle 
+                                        [attr.cx]="50 + i * 100" 
+                                        [attr.cy]="getYPosition(item.main.temp)" 
+                                        r="6" 
+                                        class="data-point" />
+                                    
+                                    <!-- Temperature value -->
+                                    <text 
+                                        [attr.x]="50 + i * 100" 
+                                        [attr.y]="getYPosition(item.main.temp) - 15" 
+                                        class="temp-label">
+                                        {{ item.main.temp | number:'1.0-0' }}°
+                                    </text>
+                                    
+                                    <!-- Weather icon -->
+                                    <image 
+                                        [attr.x]="50 + i * 100 - 20" 
+                                        [attr.y]="255" 
+                                        width="40" 
+                                        height="40" 
+                                        [attr.href]="'http://openweathermap.org/img/w/' + item.weather[0].icon + '.png'" />
+                                    
+                                    <!-- Day label -->
+                                    <text 
+                                        [attr.x]="50 + i * 100" 
+                                        [attr.y]="305" 
+                                        class="day-label-svg">
+                                        {{ item.dt * 1000 | date: 'EEE' }}
+                                    </text>
+                                </g>
+                            </svg>
+                        </div>
                     </div>
                 </div>
             </div>

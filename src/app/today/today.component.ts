@@ -39,6 +39,7 @@ export class TodayComponent implements OnInit, OnDestroy {
   cityTimestamp: Date = new Date();
 
   isDarkMode: boolean = true; // Default to dark mode
+  isGraphView: boolean = false; // Default to card view for 5-day forecast
 
   private timerSubscription: Subscription | undefined;
   private weatherSubscription: Subscription | undefined;
@@ -81,6 +82,37 @@ export class TodayComponent implements OnInit, OnDestroy {
   toggleMode(): void {
     this.isDarkMode = !this.isDarkMode;
     this.setTheme();
+  }
+
+  toggleForecastView(): void {
+    this.isGraphView = !this.isGraphView;
+  }
+
+  getMaxTemp(): number {
+    if (this.dailyForecast.length === 0) return 30;
+    return Math.max(...this.dailyForecast.map(item => item.main.temp));
+  }
+
+  getMinTemp(): number {
+    if (this.dailyForecast.length === 0) return 0;
+    return Math.min(...this.dailyForecast.map(item => item.main.temp));
+  }
+
+  getYPosition(temp: number): number {
+    const maxTemp = this.getMaxTemp();
+    const minTemp = this.getMinTemp();
+    const range = maxTemp - minTemp || 10; // Avoid division by zero
+    // Map temperature to Y coordinate (50 to 250, inverted because SVG Y grows downward)
+    return 250 - ((temp - minTemp) / range * 200);
+  }
+
+  getGraphPoints(): string {
+    if (this.dailyForecast.length === 0) return '';
+    return this.dailyForecast.map((item, index) => {
+      const x = 50 + index * 100;
+      const y = this.getYPosition(item.main.temp);
+      return `${x},${y}`;
+    }).join(' ');
   }
 
   // --- Time Management ---
