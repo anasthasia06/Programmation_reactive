@@ -18,7 +18,7 @@ body.dark-theme {
 
 /* Light Theme */
 body.light-theme {
-    --bg-color: #f0f0f0; /* Light background */
+    --bg-color: #fafafa; /* Light background */
     --card-bg-color: #ffffff;
     --text-color: #343a40;
     --shadow-color: rgba(0, 0, 0, 0.15);
