@@ -44,80 +44,82 @@
             <div class="right-card">
                 <div class="card-container current-weather-card">
 
-                    <!-- 🌡️ HORIZONTAL LAYOUT -->
-                    <div class="weather-main-row">
+    <div class="weather-main-row">
 
-                        <!-- COL 1 : TEMP + DESC -->
-                        <div class="temp-column">
-                            <p class="temp-value">{{ weather.main.temp | number:'1.0-0' }}°C</p>
-                            <p class="feels-like">Feels Like: {{ weather.main.feels_like | number:'1.0-0' }}°C</p>
-                            <p class="description-text">{{ weather.weather[0].description }}</p>
-                        </div>
+        <!-- COLONNE 1 : TEMP + DESCRIPTION -->
+        <div class="temp-column">
+            <p class="temp-value">{{ weather.main.temp | number:'1.0-0' }}°C</p>
+            <p class="feels-like">Feels Like: {{ weather.main.feels_like | number:'1.0-0' }}°C</p>
+            <p class="description-text">{{ weather.weather[0].description }}</p>
+        </div>
 
-                        <!-- COL 2 : WEATHER ICON -->
-                        <div class="icon-column text-center">
-                            <img class="weather-icon-large"
-                                [src]="'http://openweathermap.org/img/w/' + weather.weather[0].icon + '.png'">
-                        </div>
+        <!-- COLONNE 2 : ICÔNE MÉTÉO -->
+        <div class="icon-column text-center">
+            <img class="weather-icon-large"
+                 [src]="'http://openweathermap.org/img/w/' + weather.weather[0].icon + '.png'">
+        </div>
 
-                        <!-- COL 3 : DETAILS -->
-                        <div class="details-column">
-                            <div>Humidity: {{ weather.main.humidity }}%</div>
-                            <div>Wind: {{ weather.wind.speed }} km/h</div>
-                            <div>Pressure: {{ weather.main.pressure }} hPa</div>
-                            <div>UV Index: N/A</div>
-                        </div>
+        <!-- COLONNE 3 : DETAILS -->
+        <div class="details-column">
+            <div>Humidity: {{ weather.main.humidity }}%</div>
+            <div>Wind: {{ weather.wind.speed }} km/h</div>
+            <div>Pressure: {{ weather.main.pressure }} hPa</div>
+            <div>UV Index: N/A</div>
+        </div>
 
-                    </div>
+    </div>
 
-                    <!-- ☀️ SUNRISE / 🌙 SUNSET -->
-                    <div class="sun-times-row">
-                        <div class="sun-item">
-                            ☀️
-                            <p>Sunrise</p>
-                            <p class="sun-time">{{ weather.sys.sunrise * 1000 | date: 'shortTime' }}</p>
-                        </div>
+    <div class="sun-times-row">
+        <div class="sun-item">
+            ☀️
+            <p>Sunrise</p>
+            <p class="sun-time">{{ weather.sys.sunrise * 1000 | date: 'shortTime' }}</p>
+        </div>
 
-                        <div class="sun-item">
-                            🌙
-                            <p>Sunset</p>
-                            <p class="sun-time">{{ weather.sys.sunset * 1000 | date: 'shortTime' }}</p>
-                        </div>
-                    </div>
+        <div class="sun-item">
+            🌙
+            <p>Sunset</p>
+            <p class="sun-time">{{ weather.sys.sunset * 1000 | date: 'shortTime' }}</p>
+        </div>
+    </div>
 
-                </div>
+</div>
+
             </div>
 
         </div>
 
-        <!-- 📅 5-DAY FORECAST -->
-        <div class="col-12 mb-4" *ngIf="dailyForecast.length > 0">
-            <div class="card-container forecast-card">
-                <h3 class="card-title text-center">5-Day Forecast:</h3>
+        <!-- BOTTOM ROW: 5-DAY + HOURLY (side-by-side) -->
+        <div class="bottom-row" *ngIf="dailyForecast.length > 0 || hourlyForecast.length > 0">
 
-                <div *ngFor="let item of dailyForecast" class="day-item">
-                    <img [src]="'http://openweathermap.org/img/w/' + item.weather[0].icon + '.png'" alt="icon">
-                    <span class="day-temp">{{ item.main.temp | number:'1.0-0' }}°C</span>
-                    <span class="day-name">{{ item.dt * 1000 | date: 'EEEE, MMM dd' }}</span>
-                </div>
-            </div>
-        </div>
+            <div class="bottom-left" *ngIf="dailyForecast.length > 0">
+                <div class="card-container forecast-card">
+                    <h3 class="card-title text-center">5-Day Forecast:</h3>
 
-        <!-- 🕒 HOURLY FORECAST -->
-        <div class="col-12 mb-4" *ngIf="hourlyForecast.length > 0">
-            <div class="card-container forecast-card">
-                <h3 class="card-title text-center">Hourly Forecast:</h3>
-
-                <div class="hourly-grid">
-                    <div *ngFor="let hour of hourlyForecast" class="hourly-item text-center">
-                        <p class="hourly-time">{{ hour.dt * 1000 | date: 'HH:mm' }}</p>
-                        <img [src]="'http://openweathermap.org/img/w/' + hour.weather[0].icon + '.png'" alt="icon">
-                        <p class="hourly-temp">{{ hour.main.temp | number:'1.0-0' }}°C</p>
-                        <p class="hourly-wind">{{ hour.wind.speed | number:'1.0-0' }} km/h</p>
+                    <div *ngFor="let item of dailyForecast" class="day-item">
+                        <img [src]="'http://openweathermap.org/img/w/' + item.weather[0].icon + '.png'" alt="icon">
+                        <span class="day-temp">{{ item.main.temp | number:'1.0-0' }}°C</span>
+                        <span class="day-name">{{ item.dt * 1000 | date: 'EEEE, MMM dd' }}</span>
                     </div>
                 </div>
-
             </div>
+
+            <div class="bottom-right" *ngIf="hourlyForecast.length > 0">
+                <div class="card-container forecast-card">
+                    <h3 class="card-title text-center">Hourly Forecast:</h3>
+
+                    <div class="hourly-grid">
+                        <div *ngFor="let hour of hourlyForecast" class="hourly-item text-center">
+                            <p class="hourly-time">{{ hour.dt * 1000 | date: 'HH:mm' }}</p>
+                            <img [src]="'http://openweathermap.org/img/w/' + hour.weather[0].icon + '.png'" alt="icon">
+                            <p class="hourly-temp">{{ hour.main.temp | number:'1.0-0' }}°C</p>
+                            <p class="hourly-wind">{{ hour.wind.speed | number:'1.0-0' }} km/h</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
         </div>
 
         <div *ngIf="!weather" class="alert alert-info text-center mt-3">

@@ -10,7 +10,7 @@
     padding: 25px;
     margin-block: 20px;
     box-shadow: 0 8px 16px var(--shadow-color);
-    height: 100%;
+    height: auto; /* allow natural height to avoid overlapping */
     transition: background-color 0.3s, box-shadow 0.3s;
 }
 
@@ -39,10 +39,9 @@
 .search-location-group {
     display: flex;
     justify-content: center;
-    margin-inline: 25%;
-    max-width: 50%;
-    margin-bottom: 6vh;
-    margin-top: 2vh;
+    max-width: 900px; /* center and limit width instead of large inline margins */
+    width: 100%;
+    margin: 2vh auto 6vh;
 }
 
 .search-bar {
@@ -317,12 +316,34 @@
     display: flex;
     gap: 20px;
     margin-bottom: 30px;
+    flex-wrap: wrap; /* allow cards to wrap on narrow screens */
+    align-items: stretch; /* make cards same height when possible */
 }
 .left-card {
-    flex: 1;
+    /* Make both columns equal width like the reference mockup */
+    flex: 0 1 48%;
+    max-width: 48%;
+    min-width: 300px;
 }
 .right-card {
-    flex: 2;
+    flex: 0 1 48%;
+    max-width: 48%;
+    min-width: 300px;
+}
+
+/* Ensure both card wrappers stretch to the same height */
+.left-card, .right-card {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Make the inner card container fill the wrapper so both cards match height */
+.left-card > .card-container,
+.right-card > .card-container {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* center content vertically like the mockup */
 }
 
 /* STYLE HORIZONTAL DU BLOC METEO */
@@ -342,18 +363,18 @@
 
 /* Cartes */
 .card-container {
-  background: #2e2e2e;
-  padding: 25px;
-  border-radius: 18px;
-  color: white;
-  box-shadow: 0px 5px 20px rgba(0,0,0,0.2);
+    background: var(--card-bg-color, #2e2e2e);
+    padding: 30px;
+    border-radius: 18px;
+    color: var(--text-color, #fff);
+    box-shadow: 0px 10px 30px rgba(0,0,0,0.45);
 }
 .weather-main-row {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 0;
-  gap: 30px;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0 0 0;
+    gap: 40px;
 }
 
 .temp-column {
@@ -361,19 +382,24 @@
 }
 
 .icon-column {
-  flex: 1;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .details-column {
-  flex: 1;
-  font-size: 14px;
-  line-height: 1.5;
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.6;
+    text-align: right; /* details aligned to the right like the reference */
 }
 
 .temp-value {
-  font-size: 48px;
-  font-weight: bold;
-  color: #ffcc00;
+    font-size: 56px;
+    font-weight: 800;
+    color: var(--accent-color, #ffcc00);
+    text-align: center;
 }
 
 .description-text {
@@ -387,15 +413,60 @@
 }
 
 .sun-times-row {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 20px;
-  border-top: 1px solid #444;
-  padding-top: 15px;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding-top: 18px;
 }
 
 .sun-item {
-  text-align: center;
+    text-align: center;
+    width: 45%;
+}
+
+/* Make the left card content vertically centered like the mockup */
+.main-info-card {
+    padding: 40px 20px;
+}
+
+/* Small responsive tweak: on very small screens keep full width */
+@media (max-width: 720px) {
+    .left-card, .right-card {
+        flex: 0 1 100%;
+        max-width: 100%;
+    }
+    .search-location-group { max-width: 95%; }
+}
+
+/* Bottom row styles for 5-day + hourly side-by-side */
+.bottom-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    align-items: stretch;
+}
+.bottom-left,
+.bottom-right {
+    flex: 0 1 48%;
+    max-width: 48%;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+}
+.bottom-left > .card-container,
+.bottom-right > .card-container {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width: 720px) {
+    .bottom-left, .bottom-right {
+        flex: 0 1 100%;
+        max-width: 100%;
+    }
 }
 
 .sun-time {
