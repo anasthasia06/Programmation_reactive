@@ -40,7 +40,8 @@
     justify-content: center;
     margin-inline: 25%;
     max-width: 50%;
-    margin-block: 8vh;
+    margin-bottom: 6vh;
+    margin-top: 2vh;
 }
 
 .search-bar {
