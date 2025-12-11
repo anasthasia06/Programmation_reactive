@@ -5,7 +5,7 @@
 
             <div class="dark-mode-container mr-3">
                 <button class="btn btn-sm mode-switch-btn" (click)="toggleMode()">
-                    {{ isDarkMode ? 'Mode Clair' : 'Mode Sombre' }}
+                    {{ isDarkMode ? 'Light Mode' : 'Dark Mode' }}
                 </button>
             </div>
 
@@ -15,13 +15,13 @@
                     <span class="input-group-text search-icon">🔍</span>
                     <input type="text"
                            class="form-control"
-                           placeholder="Recherchez votre ville préférée..."
+                           placeholder="Search your favorite city..."
                            [(ngModel)]="cityName"
                            (keyup.enter)="getWeatherByCity()">
                 </div>
 
                 <button class="btn btn-location" (click)="getLocation()">
-                    Localisation Actuelle
+                    Current Location
                 </button>
             </div>
 
@@ -33,7 +33,7 @@
                 <div class="card-container main-info-card">
                     <h4 class="city-name">{{ weather.name }}, {{ weather.sys.country }}</h4>
                     <p class="current-time">{{ cityTimestamp | date: 'HH:mm' }}</p>
-                    <p class="current-date">{{ cityTimestamp | date: 'EEEE, dd MMM' }}</p>
+                    <p class="current-date">{{ cityTimestamp | date: 'EEEE, MMM dd' }}</p>
                 </div>
             </div>
 
@@ -44,20 +44,20 @@
 
                         <div class="col-6 text-center">
                             <p class="display-3 temp-value">{{ weather.main.temp | number:'1.0-0' }}°C</p>
-                            <p class="feels-like">Ressenti : {{ weather.main.feels_like | number:'1.0-0' }}°C</p>
+                            <p class="feels-like">Feels Like: {{ weather.main.feels_like | number:'1.0-0' }}°C</p>
                             <p class="description-text text-uppercase">{{ weather.weather[0].description }}</p>
                         </div>
 
                         <div class="col-6 detail-icon-group text-center">
                             <img class="weather-icon-large"
                                  [src]="'http://openweathermap.org/img/w/' + weather.weather[0].icon + '.png'"
-                                 alt="icône météo">
+                                 alt="weather icon">
 
                             <div class="detail-grid-small mt-3">
-                                <div class="detail-item-small"><span>Humidité</span> <span>{{ weather.main.humidity }}%</span></div>
-                                <div class="detail-item-small"><span>Vitesse Vent</span> <span>{{ weather.wind.speed | number:'1.0-0' }} km/h</span></div>
-                                <div class="detail-item-small"><span>Pression</span> <span>{{ weather.main.pressure }} hpa</span></div>
-                                <div class="detail-item-small"><span>Indice UV</span> <span>N/A</span></div>
+                                <div class="detail-item-small"><span>Humidity</span> <span>{{ weather.main.humidity }}%</span></div>
+                                <div class="detail-item-small"><span>Wind Speed</span> <span>{{ weather.wind.speed | number:'1.0-0' }} km/h</span></div>
+                                <div class="detail-item-small"><span>Pressure</span> <span>{{ weather.main.pressure }} hpa</span></div>
+                                <div class="detail-item-small"><span>UV Index</span> <span>N/A</span></div>
                             </div>
                         </div>
                     </div>
@@ -66,13 +66,13 @@
 
                         <div class="sun-item text-center">
                             <span class="sun-icon">☀️</span>
-                            <p class="sun-label">Lever du Soleil</p>
+                            <p class="sun-label">Sunrise</p>
                             <p class="sun-time">{{ weather.sys.sunrise * 1000 | date: 'shortTime' }}</p>
                         </div>
 
                         <div class="sun-item text-center">
                             <span class="sun-icon">🌙</span>
-                            <p class="sun-label">Coucher du Soleil</p>
+                            <p class="sun-label">Sunset</p>
                             <p class="sun-time">{{ weather.sys.sunset * 1000 | date: 'shortTime' }}</p>
                         </div>
                     </div>
@@ -82,24 +82,24 @@
 
             <div class="col-12 col-md-6 mb-4" *ngIf="dailyForecast.length > 0">
                 <div class="card-container forecast-card">
-                    <h3 class="card-title">Prévisions 5 Jours :</h3>
+                    <h3 class="card-title">5-Day Forecast:</h3>
 
                     <div *ngFor="let item of dailyForecast" class="day-item">
-                        <img [src]="'http://openweathermap.org/img/w/' + item.weather[0].icon + '.png'" alt="icône">
+                        <img [src]="'http://openweathermap.org/img/w/' + item.weather[0].icon + '.png'" alt="icon">
                         <span class="day-temp">{{ item.main.temp | number:'1.0-0' }}°C</span>
-                        <span class="day-name">{{ item.dt * 1000 | date: 'EEEE, dd MMM' }}</span>
+                        <span class="day-name">{{ item.dt * 1000 | date: 'EEEE, MMM dd' }}</span>
                     </div>
                 </div>
             </div>
 
             <div class="col-12 col-md-6 mb-4" *ngIf="hourlyForecast.length > 0">
                 <div class="card-container forecast-card">
-                    <h3 class="card-title">Prévisions Horaires :</h3>
+                    <h3 class="card-title">Hourly Forecast:</h3>
                     <div class="hourly-grid">
 
                         <div *ngFor="let hour of hourlyForecast" class="hourly-item text-center">
                             <p class="hourly-time">{{ hour.dt * 1000 | date: 'HH:mm' }}</p>
-                            <img [src]="'http://openweathermap.org/img/w/' + hour.weather[0].icon + '.png'" alt="icône">
+                            <img [src]="'http://openweathermap.org/img/w/' + hour.weather[0].icon + '.png'" alt="icon">
                             <p class="hourly-temp">{{ hour.main.temp | number:'1.0-0' }}°C</p>
                             <p class="hourly-wind">{{ hour.wind.speed | number:'1.0-0' }} km/h</p>
                         </div>
@@ -110,7 +110,7 @@
         </div>
 
         <div *ngIf="!weather" class="alert alert-info text-center mt-3">
-            Chargement des données... Veuillez entrer une ville ou autoriser l'accès à la localisation.
+            Loading data... Please enter a city or allow location access.
         </div>
     </div>
 </div>

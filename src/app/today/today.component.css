@@ -1,7 +1,7 @@
 /* src/app/today/today.component.css */
 
 /* ------------------------------------------- */
-/* 1. STYLES GÉNÉRAUX ET CARTES */
+/* 1. GENERAL STYLES AND CARDS */
 /* ------------------------------------------- */
 
 .card-container {
@@ -22,7 +22,7 @@
 }
 
 /* ------------------------------------------- */
-/* 2. TOP BARRE (SEARCH & BUTTONS) */
+/* 2. TOP BAR (SEARCH & BUTTONS) */
 /* ------------------------------------------- */
 
 .mode-switch-btn {
@@ -34,13 +34,13 @@
     transition: background-color 0.3s, color 0.3s;
 }
 
-/* NOUVEAU CONTENEUR POUR LE GROUPE RECHERCHE/LOCALISATION */
+/* NEW CONTAINER FOR SEARCH/LOCATION GROUP */
 .search-location-group {
     max-width: 650px;
 }
 
 .search-bar {
-    /* CORRECTION CLÉ: Enlève la bordure droite pour se coller au bouton vert */
+    /* KEY FIX: Remove right border to stick to the green button */
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
 
@@ -76,7 +76,7 @@
     font-weight: 600;
     padding: 10px 15px;
 
-    /* CORRECTION CLÉ: Enlève la bordure gauche pour se coller à la barre de recherche */
+    /* KEY FIX: Remove left border to stick to the search bar */
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
     border-top-right-radius: 25px;
@@ -84,10 +84,10 @@
 }
 
 /* ------------------------------------------- */
-/* 3. CARTES PRINCIPALES */
+/* 3. MAIN CARDS */
 /* ------------------------------------------- */
 
-/* Carte 1: Ville/Date/Heure */
+/* Card 1: City/Date/Time */
 .main-info-card {
     display: flex;
     flex-direction: column;
@@ -117,7 +117,7 @@
     font-size: 1.1rem;
 }
 
-/* Carte 2: Météo Actuelle */
+/* Card 2: Current Weather */
 .temp-value {
     font-weight: 300;
     color: var(--accent-color);
@@ -131,7 +131,7 @@
 }
 
 /* ------------------------------------------- */
-/* STYLE LEVER/COUCHER DU SOLEIL (3.5) */
+/* SUNRISE/SUNSET STYLE (3.5) */
 /* ------------------------------------------- */
 
 .sun-times-row {
@@ -143,7 +143,7 @@
 
 .sun-flex-container {
     display: flex;
-    justify-content: space-around; /* Sépare les deux éléments aux extrémités */
+    justify-content: space-around; /* Separates the two elements at the ends */
     width: 100%;
 }
 
@@ -152,7 +152,7 @@
     flex-direction: column;
     align-items: center;
     padding: 0 10px;
-    width: 50%; /* Donne à chaque élément une largeur égale */
+    width: 50%; /* Give each element equal width */
 }
 
 .sun-icon {
@@ -174,7 +174,7 @@
 }
 
 
-/* Grille 2x2 des détails rapides */
+/* 2x2 grid of quick details */
 .weather-icon-large {
     width: 80px;
     height: 80px;
@@ -220,10 +220,10 @@
 }
 
 /* ------------------------------------------- */
-/* 4. CARTES DE PRÉVISIONS */
+/* 4. FORECAST CARDS */
 /* ------------------------------------------- */
 
-/* Prévisions 5 jours */
+/* 5-Day Forecast */
 .day-item {
     display: flex;
     justify-content: space-between;
@@ -254,7 +254,7 @@
     min-width: 110px;
 }
 
-/* Prévisions Horaires */
+/* Hourly Forecast */
 .hourly-grid {
     display: flex;
     justify-content: center;

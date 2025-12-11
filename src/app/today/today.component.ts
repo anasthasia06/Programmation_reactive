@@ -1,111 +1,191 @@
-// src/app/today/today.component.ts
+// Assuming this is a component file like today.component.ts
 
-import { Component, OnInit } from '@angular/core';
-import { WeatherService } from '../weather.service';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { WeatherService } from '../weather.service'; // Assuming path
+import { Subscription, interval } from 'rxjs';
+import { switchMap, startWith } from 'rxjs/operators';
+
+// Interface examples (you would define these more formally in a real project)
+interface WeatherData {
+  name: string;
+  sys: { country: string, sunrise: number, sunset: number };
+  main: { temp: number, feels_like: number, humidity: number, pressure: number };
+  weather: [{ icon: string, description: string }];
+  wind: { speed: number };
+  timezone: number;
+}
+
+interface ForecastItem {
+  dt: number;
+  main: { temp: number };
+  weather: [{ icon: string }];
+  wind: { speed: number };
+}
 
 @Component({
   selector: 'app-today',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './today.component.html',
-  styleUrl: './today.component.css',
+  styleUrls: ['./today.component.css']
 })
-export class TodayComponent implements OnInit {
-
-  public readonly Date = Date;
-
-  lat: number | undefined;
-  lon: number | undefined;
-  weather: any;
-  forecast: any;
+export class TodayComponent implements OnInit, OnDestroy {
   cityName: string = '';
-  dailyForecast: any[] = [];
-  hourlyForecast: any[] = [];
-  cityTimestamp: number = Date.now();
+  weather: WeatherData | null = null;
+  dailyForecast: ForecastItem[] = [];
+  hourlyForecast: ForecastItem[] = [];
+  cityTimestamp: Date = new Date();
 
-  isDarkMode: boolean = true;
+  isDarkMode: boolean = true; // Default to dark mode
 
-  constructor(private weatherService: WeatherService){}
+  private timerSubscription: Subscription | undefined;
+  private weatherSubscription: Subscription | undefined;
 
-  ngOnInit() {
-    this.applyTheme();
-    this.getLocation();
+  constructor(private weatherService: WeatherService) { }
+
+  ngOnInit(): void {
+    // Set initial theme based on default
+    this.setTheme();
+    // Default to a location (e.g., London or use geolocation)
+    this.cityName = 'London';
+    this.getWeatherByCity();
+
+    // Start interval to update time every minute
+    this.timerSubscription = interval(1000) // Update every second for smooth clock
+      .pipe(startWith(0))
+      .subscribe(() => {
+        if (this.weather) {
+          this.updateCityTime(this.weather.timezone);
+        } else {
+          this.cityTimestamp = new Date(); // Fallback to local time
+        }
+      });
   }
 
-  toggleMode() {
+  ngOnDestroy(): void {
+    if (this.timerSubscription) {
+      this.timerSubscription.unsubscribe();
+    }
+    if (this.weatherSubscription) {
+      this.weatherSubscription.unsubscribe();
+    }
+  }
+
+  // --- Theme Management ---
+  setTheme(): void {
+    document.body.className = this.isDarkMode ? 'dark-theme' : 'light-theme';
+  }
+
+  toggleMode(): void {
     this.isDarkMode = !this.isDarkMode;
-    this.applyTheme();
+    this.setTheme();
   }
 
-  applyTheme() {
-    if (this.isDarkMode) {
-        document.body.classList.add('dark-theme');
-        document.body.classList.remove('light-theme');
-    } else {
-        document.body.classList.add('light-theme');
-        document.body.classList.remove('dark-theme');
-    }
+  // --- Time Management ---
+  updateCityTime(timezoneOffsetSeconds: number): void {
+    const localTime = new Date();
+    // Calculate UTC time in milliseconds
+    const utcTime = localTime.getTime() + (localTime.getTimezoneOffset() * 60000);
+    // Apply city's timezone offset
+    this.cityTimestamp = new Date(utcTime + (timezoneOffsetSeconds * 1000));
   }
 
-  getLocation() {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.watchPosition((success) => {
-        this.lat = success.coords.latitude;
-        this.lon = success.coords.longitude;
-        if (this.lat && this.lon) {
-          this.fetchWeatherData(this.lat, this.lon);
-        }
-      });
-    } else {
-      console.warn("La géolocalisation n'est pas supportée. Veuillez utiliser la barre de recherche.");
-    }
-  }
+  // --- Weather Retrieval ---
+  getWeatherByCity(): void {
+    if (!this.cityName) return;
 
-  fetchWeatherData(lat: number, lon: number) {
-    this.weatherService.getWeatherDataByCoords(lat, lon).subscribe({
-      next: (data: any) => {
-        this.weather = data;
-        this.cityName = data.name;
-
-        // Calcul de l'heure locale de la ville
-        const localUtc = Date.now() + (new Date().getTimezoneOffset() * 60000);
-        const targetCityMs = localUtc + (data.timezone * 1000);
-        this.cityTimestamp = targetCityMs;
-      },
-      error: (err) => { console.error("Erreur météo actuelle:", err); }
-    });
-
-    this.weatherService.getForecastDataByCoords(lat, lon).subscribe({
-      next: (data: any) => {
-        this.forecast = data;
-
-        this.hourlyForecast = data.list.slice(0, 5);
-
-        const filteredDays: any[] = [];
-        for (let i = 0; i < data.list.length; i += 8) {
-            filteredDays.push(data.list[i + 4] || data.list[i]);
-        }
-        this.dailyForecast = filteredDays.slice(0, 5);
-      },
-      error: (err) => { console.error("Erreur prévisions:", err); }
-    });
-  }
-
-  getWeatherByCity() {
-    if (this.cityName) {
-      this.weatherService.getWeatherDataByCityName(this.cityName).subscribe({
-        next: (data: any) => {
-          this.fetchWeatherData(data.coord.lat, data.coord.lon);
+    this.weatherSubscription = this.weatherService.getWeatherDataByCityName(this.cityName)
+      .subscribe({
+        next: (response) => {
+          this.weather = response;
+          this.updateCityTime(response.timezone);
+          this.getForecast(response.coord.lat, response.coord.lon);
         },
-        error: (err) => {
-          console.error("Ville non trouvée ou erreur :", err);
-          alert("Ville non trouvée ou erreur de connexion.");
-          this.weather = null;
-          this.forecast = null;
+        error: (error) => {
+          console.error('Error fetching weather data:', error);
+          this.weather = null; // Clear data on error
+          alert('City not found or API error. Please try again.');
         }
       });
+  }
+
+  getLocation(): void {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          this.getWeatherByCoords(lat, lon);
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
+          alert('Geolocation not supported or denied.');
+        }
+      );
+    } else {
+      alert('Geolocation is not supported by this browser.');
     }
+  }
+
+  getWeatherByCoords(lat: number, lon: number): void {
+    this.weatherSubscription = this.weatherService.getWeatherDataByCoords(lat, lon)
+      .subscribe({
+        next: (response) => {
+          this.weather = response;
+          this.cityName = response.name; // Update search bar with city name
+          this.updateCityTime(response.timezone);
+          this.getForecast(lat, lon);
+        },
+        error: (error) => {
+          console.error('Error fetching weather data by coords:', error);
+          this.weather = null;
+          alert('Could not fetch weather data for your location.');
+        }
+      });
+  }
+
+  // --- Forecast Processing ---
+  getForecast(lat: number, lon: number): void {
+    this.weatherService.getForecastDataByCoords(lat, lon)
+      .subscribe({
+        next: (response: any) => {
+          this.processForecast(response.list);
+        },
+        error: (error) => {
+          console.error('Error fetching forecast data:', error);
+        }
+      });
+  }
+
+  processForecast(list: any[]): void {
+    const dailyMap = new Map<string, ForecastItem>();
+    this.hourlyForecast = [];
+
+    const now = new Date();
+    let hourlyCount = 0;
+
+    for (const item of list) {
+      const date = new Date(item.dt * 1000);
+      const dateString = date.toISOString().split('T')[0];
+
+      // 1. Process 5-Day Forecast (one entry per day, e.g., noon forecast)
+      // Check if we already have a forecast for this day.
+      // We take the forecast closest to noon (12:00) if possible.
+      if (!dailyMap.has(dateString)) {
+         dailyMap.set(dateString, item);
+      }
+
+      // 2. Process Hourly Forecast (for the current day and upcoming hours)
+      // Display the next 8 hourly forecasts
+      if (date.getTime() > now.getTime() && hourlyCount < 8) {
+        this.hourlyForecast.push(item);
+        hourlyCount++;
+      }
+    }
+
+    // Convert map values to array for the daily forecast
+    this.dailyForecast = Array.from(dailyMap.values()).slice(0, 5);
   }
 }
