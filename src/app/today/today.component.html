@@ -1,6 +1,7 @@
 <div class="row justify-content-center">
     <div class="col-12 col-lg-10">
 
+        <!-- 🔍 SEARCH + DARK MODE BAR -->
         <div class="d-flex align-items-center justify-content-center mb-4 control-bar">
 
             <div class="dark-mode-container mr-3">
@@ -27,9 +28,11 @@
 
         </div>
 
-        <div class="row justify-content-center" *ngIf="weather">
+        <!-- 🌦️ MAIN WEATHER ROW -->
+        <div class="main-row" *ngIf="weather">
 
-            <div class="col-12 col-md-6 mb-4">
+            <!-- 🟦 LEFT CARD: CITY & DATE -->
+            <div class="left-card">
                 <div class="card-container main-info-card">
                     <h4 class="city-name">{{ weather.name }}, {{ weather.sys.country }}</h4>
                     <p class="current-time">{{ cityTimestamp | date: 'HH:mm' }}</p>
@@ -37,42 +40,47 @@
                 </div>
             </div>
 
-            <div class="col-12 col-md-6 mb-4">
+            <!-- 🟧 RIGHT CARD: CURRENT WEATHER -->
+            <div class="right-card">
                 <div class="card-container current-weather-card">
 
-                    <div class="weather-details-header row align-items-center mb-3">
+                    <!-- 🌡️ HORIZONTAL LAYOUT -->
+                    <div class="weather-main-row">
 
-                        <div class="col-6 text-center">
-                            <p class="display-3 temp-value">{{ weather.main.temp | number:'1.0-0' }}°C</p>
+                        <!-- COL 1 : TEMP + DESC -->
+                        <div class="temp-column">
+                            <p class="temp-value">{{ weather.main.temp | number:'1.0-0' }}°C</p>
                             <p class="feels-like">Feels Like: {{ weather.main.feels_like | number:'1.0-0' }}°C</p>
-                            <p class="description-text text-uppercase">{{ weather.weather[0].description }}</p>
+                            <p class="description-text">{{ weather.weather[0].description }}</p>
                         </div>
 
-                        <div class="col-6 detail-icon-group text-center">
+                        <!-- COL 2 : WEATHER ICON -->
+                        <div class="icon-column text-center">
                             <img class="weather-icon-large"
-                                 [src]="'http://openweathermap.org/img/w/' + weather.weather[0].icon + '.png'"
-                                 alt="weather icon">
-
-                            <div class="detail-grid-small mt-3">
-                                <div class="detail-item-small"><span>Humidity</span> <span>{{ weather.main.humidity }}%</span></div>
-                                <div class="detail-item-small"><span>Wind Speed</span> <span>{{ weather.wind.speed | number:'1.0-0' }} km/h</span></div>
-                                <div class="detail-item-small"><span>Pressure</span> <span>{{ weather.main.pressure }} hpa</span></div>
-                                <div class="detail-item-small"><span>UV Index</span> <span>N/A</span></div>
-                            </div>
+                                [src]="'http://openweathermap.org/img/w/' + weather.weather[0].icon + '.png'">
                         </div>
+
+                        <!-- COL 3 : DETAILS -->
+                        <div class="details-column">
+                            <div>Humidity: {{ weather.main.humidity }}%</div>
+                            <div>Wind: {{ weather.wind.speed }} km/h</div>
+                            <div>Pressure: {{ weather.main.pressure }} hPa</div>
+                            <div>UV Index: N/A</div>
+                        </div>
+
                     </div>
 
-                    <div class="sun-times-row pt-3 border-top sun-flex-container">
-
-                        <div class="sun-item text-center">
-                            <span class="sun-icon">☀️</span>
-                            <p class="sun-label">Sunrise</p>
+                    <!-- ☀️ SUNRISE / 🌙 SUNSET -->
+                    <div class="sun-times-row">
+                        <div class="sun-item">
+                            ☀️
+                            <p>Sunrise</p>
                             <p class="sun-time">{{ weather.sys.sunrise * 1000 | date: 'shortTime' }}</p>
                         </div>
 
-                        <div class="sun-item text-center">
-                            <span class="sun-icon">🌙</span>
-                            <p class="sun-label">Sunset</p>
+                        <div class="sun-item">
+                            🌙
+                            <p>Sunset</p>
                             <p class="sun-time">{{ weather.sys.sunset * 1000 | date: 'shortTime' }}</p>
                         </div>
                     </div>
@@ -80,32 +88,35 @@
                 </div>
             </div>
 
-            <div class="col-12 col-md-6 mb-4" *ngIf="dailyForecast.length > 0">
-                <div class="card-container forecast-card">
-                    <h3 class="card-title">5-Day Forecast:</h3>
+        </div>
 
-                    <div *ngFor="let item of dailyForecast" class="day-item">
-                        <img [src]="'http://openweathermap.org/img/w/' + item.weather[0].icon + '.png'" alt="icon">
-                        <span class="day-temp">{{ item.main.temp | number:'1.0-0' }}°C</span>
-                        <span class="day-name">{{ item.dt * 1000 | date: 'EEEE, MMM dd' }}</span>
-                    </div>
+        <!-- 📅 5-DAY FORECAST -->
+        <div class="col-12 mb-4" *ngIf="dailyForecast.length > 0">
+            <div class="card-container forecast-card">
+                <h3 class="card-title text-center">5-Day Forecast:</h3>
+
+                <div *ngFor="let item of dailyForecast" class="day-item">
+                    <img [src]="'http://openweathermap.org/img/w/' + item.weather[0].icon + '.png'" alt="icon">
+                    <span class="day-temp">{{ item.main.temp | number:'1.0-0' }}°C</span>
+                    <span class="day-name">{{ item.dt * 1000 | date: 'EEEE, MMM dd' }}</span>
                 </div>
             </div>
+        </div>
 
-            <div class="col-12 col-md-6 mb-4" *ngIf="hourlyForecast.length > 0">
-                <div class="card-container forecast-card">
-                    <h3 class="card-title">Hourly Forecast:</h3>
-                    <div class="hourly-grid">
+        <!-- 🕒 HOURLY FORECAST -->
+        <div class="col-12 mb-4" *ngIf="hourlyForecast.length > 0">
+            <div class="card-container forecast-card">
+                <h3 class="card-title text-center">Hourly Forecast:</h3>
 
-                        <div *ngFor="let hour of hourlyForecast" class="hourly-item text-center">
-                            <p class="hourly-time">{{ hour.dt * 1000 | date: 'HH:mm' }}</p>
-                            <img [src]="'http://openweathermap.org/img/w/' + hour.weather[0].icon + '.png'" alt="icon">
-                            <p class="hourly-temp">{{ hour.main.temp | number:'1.0-0' }}°C</p>
-                            <p class="hourly-wind">{{ hour.wind.speed | number:'1.0-0' }} km/h</p>
-                        </div>
-
+                <div class="hourly-grid">
+                    <div *ngFor="let hour of hourlyForecast" class="hourly-item text-center">
+                        <p class="hourly-time">{{ hour.dt * 1000 | date: 'HH:mm' }}</p>
+                        <img [src]="'http://openweathermap.org/img/w/' + hour.weather[0].icon + '.png'" alt="icon">
+                        <p class="hourly-temp">{{ hour.main.temp | number:'1.0-0' }}°C</p>
+                        <p class="hourly-wind">{{ hour.wind.speed | number:'1.0-0' }} km/h</p>
                     </div>
                 </div>
+
             </div>
         </div>
 
