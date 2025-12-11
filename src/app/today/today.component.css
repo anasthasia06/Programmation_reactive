@@ -1,0 +1,304 @@
+/* src/app/today/today.component.css */
+
+/* ------------------------------------------- */
+/* 1. STYLES GÉNÉRAUX ET CARTES */
+/* ------------------------------------------- */
+
+.card-container {
+    border-radius: 15px;
+    background-color: var(--card-bg-color);
+    padding: 25px;
+    box-shadow: 0 8px 16px var(--shadow-color);
+    height: 100%;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* ------------------------------------------- */
+/* 2. TOP BARRE (SEARCH & BUTTONS) */
+/* ------------------------------------------- */
+
+.mode-switch-btn {
+    background-color: var(--card-bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--text-color);
+    border-radius: 25px;
+    padding: 8px 15px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* NOUVEAU CONTENEUR POUR LE GROUPE RECHERCHE/LOCALISATION */
+.search-location-group {
+    max-width: 650px;
+}
+
+.search-bar {
+    /* CORRECTION CLÉ: Enlève la bordure droite pour se coller au bouton vert */
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+
+    flex-grow: 1;
+    height: 45px;
+
+    max-width: none;
+    overflow: hidden;
+    background-color: var(--secondary-bg);
+    border: none;
+    transition: background-color 0.3s;
+}
+
+.search-icon, .form-control {
+    background-color: var(--secondary-bg);
+    border: none;
+    color: var(--text-color);
+}
+
+.form-control {
+    height: 100%;
+}
+
+.form-control::placeholder {
+    color: var(--text-color);
+    opacity: 0.7;
+}
+
+.btn-location {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 10px 15px;
+
+    /* CORRECTION CLÉ: Enlève la bordure gauche pour se coller à la barre de recherche */
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+}
+
+/* ------------------------------------------- */
+/* 3. CARTES PRINCIPALES */
+/* ------------------------------------------- */
+
+/* Carte 1: Ville/Date/Heure */
+.main-info-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.city-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-color);
+    text-align: center;
+}
+
+.current-time {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.current-date {
+    color: var(--text-color);
+    opacity: 0.7;
+    font-size: 1.1rem;
+}
+
+/* Carte 2: Météo Actuelle */
+.temp-value {
+    font-weight: 300;
+    color: var(--accent-color);
+    text-align: center;
+}
+
+.feels-like, .description-text {
+    color: var(--text-color);
+    opacity: 0.7;
+    text-align: center;
+}
+
+/* ------------------------------------------- */
+/* STYLE LEVER/COUCHER DU SOLEIL (3.5) */
+/* ------------------------------------------- */
+
+.sun-times-row {
+    color: var(--text-color);
+    border-color: var(--secondary-bg) !important;
+    margin: 0 -15px;
+    padding: 10px 0;
+}
+
+.sun-flex-container {
+    display: flex;
+    justify-content: space-around; /* Sépare les deux éléments aux extrémités */
+    width: 100%;
+}
+
+.sun-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 10px;
+    width: 50%; /* Donne à chaque élément une largeur égale */
+}
+
+.sun-icon {
+    font-size: 2.5rem;
+    margin-bottom: 5px;
+}
+
+.sun-label {
+    font-size: 0.85rem;
+    color: var(--text-color);
+    opacity: 0.7;
+    margin-bottom: 2px;
+}
+
+.sun-time {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent-color);
+}
+
+
+/* Grille 2x2 des détails rapides */
+.weather-icon-large {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 5px;
+}
+
+.detail-icon-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    padding-top: 10px;
+}
+
+.detail-grid-small {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+}
+
+.detail-item-small {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    background-color: var(--secondary-bg);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    height: 65px;
+}
+
+.detail-item-small span:first-child {
+    font-weight: 400;
+    opacity: 0.8;
+}
+
+.detail-item-small span:last-child {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--accent-color);
+}
+
+/* ------------------------------------------- */
+/* 4. CARTES DE PRÉVISIONS */
+/* ------------------------------------------- */
+
+/* Prévisions 5 jours */
+.day-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--secondary-bg);
+    color: var(--text-color);
+}
+
+.day-item:last-child {
+    border-bottom: none;
+}
+
+.day-item img {
+    width: 30px;
+    margin-right: 15px;
+}
+
+.day-item .day-temp {
+    font-weight: 600;
+    color: var(--accent-color);
+    flex-grow: 1;
+    text-align: left;
+}
+
+.day-item .day-name {
+    text-align: right;
+    min-width: 110px;
+}
+
+/* Prévisions Horaires */
+.hourly-grid {
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
+    gap: 15px;
+    padding: 5px;
+}
+
+.hourly-item {
+    min-width: 100px;
+    background-color: var(--secondary-bg);
+    border-radius: 12px;
+    padding: 15px 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s;
+}
+
+.hourly-item:hover {
+    background-color: color-mix(in srgb, var(--secondary-bg) 90%, #6c757d);
+}
+
+.hourly-time {
+    font-weight: 600;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+    color: var(--text-color);
+}
+
+.hourly-item img {
+    width: 50px;
+    height: 50px;
+    margin: 5px 0;
+}
+
+.hourly-temp {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    margin: 5px 0;
+}
+
+.hourly-wind {
+    font-size: 0.8rem;
+    color: var(--text-color);
+    opacity: 0.6;
+    margin-top: 5px;
+}

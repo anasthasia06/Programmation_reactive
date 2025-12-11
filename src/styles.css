@@ -1,1 +1,33 @@
-/* You can add global styles to this file, and also import other style files */
+/* src/styles.css */
+
+/* --- DÉFINITION DES THÈMES GLOBALES --- */
+body {
+    transition: background-color 0.3s, color 0.3s;
+    font-family: Arial, sans-serif;
+}
+
+/* Thème Sombre */
+body.dark-theme {
+    --bg-color: #242424; /* Fond d'écran sombre */
+    --card-bg-color: #383838; /* Fond des cartes */
+    --text-color: #ffffff;
+    --shadow-color: rgba(0, 0, 0, 0.4);
+    --accent-color: #ffd700; /* Jaune or pour l'accentuation */
+    --secondary-bg: #4a4a4a; /* Fond pour les éléments de détails */
+}
+
+/* Thème Clair */
+body.light-theme {
+    --bg-color: #f0f0f0; /* Fond d'écran clair */
+    --card-bg-color: #ffffff;
+    --text-color: #343a40;
+    --shadow-color: rgba(0, 0, 0, 0.15);
+    --accent-color: #FFA500; /* Orange pour l'accentuation */
+    --secondary-bg: #e9ecef;
+}
+
+/* Applique le thème par défaut pour la transition */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}

@@ -1,6 +1,13 @@
-import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/app.config';
-import { App } from './app/app';
+// src/main.ts
 
-bootstrapApplication(App, appConfig)
+import { bootstrapApplication } from '@angular/platform-browser';
+import { AppComponent } from './app/app.component';
+import { provideHttpClient } from '@angular/common/http';
+
+bootstrapApplication(AppComponent, {
+  // Fournit le client HTTP pour que WeatherService puisse être injecté
+  providers: [
+    provideHttpClient()
+  ]
+})
   .catch((err) => console.error(err));
