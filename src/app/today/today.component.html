@@ -180,7 +180,10 @@
                                 @for (item of forecast.daily; track $index) {
                                     <div class="day-item">
                                         <img [src]="'http://openweathermap.org/img/w/' + item.weather[0].icon + '.png'">
-                                        <span class="day-temp">{{ item.main.temp | number:'1.0-0' }}°C</span>
+                                        <div class="day-temps">
+                                            <span class="day-temp-max">{{ (item.main.temp_max || item.main.temp) | number:'1.0-0' }}°C</span>
+                                            <span class="day-temp-min">{{ (item.main.temp_min || item.main.temp) | number:'1.0-0' }}°C</span>
+                                        </div>
                                         <span class="day-name">{{ item.dt * 1000 | date: 'EEEE, MMM dd' }}</span>
                                     </div>
                                 }
@@ -201,25 +204,47 @@
                                                 </line>
                                             }
 
-                                            <polyline [attr.points]="getGraphPoints()" class="temp-curve" fill="none"></polyline>
                                             <defs>
-                                                <linearGradient id="tempGradient" x1="0" y1="0" x2="0" y2="100%">
-                                                    <stop offset="0%" style="stop-color:var(--accent-color);stop-opacity:0.3"></stop>
-                                                    <stop offset="100%" style="stop-color:var(--accent-color);stop-opacity:0.05"></stop>
+                                                <linearGradient id="tempGradientMax" x1="0" y1="0" x2="0" y2="100%">
+                                                    <stop offset="0%" style="stop-color:#ff4444;stop-opacity:0.2"></stop>
+                                                    <stop offset="100%" style="stop-color:#ff4444;stop-opacity:0.05"></stop>
+                                                </linearGradient>
+                                                <linearGradient id="tempGradientMin" x1="0" y1="0" x2="0" y2="100%">
+                                                    <stop offset="0%" style="stop-color:#4488ff;stop-opacity:0.2"></stop>
+                                                    <stop offset="100%" style="stop-color:#4488ff;stop-opacity:0.05"></stop>
                                                 </linearGradient>
                                             </defs>
-                                            <polygon [attr.points]="getGraphPoints() + ' 500,250 0,250'"fill="url(#tempGradient)"></polygon>
+
+                                            <!-- Courbe maximale (rouge) -->
+                                            <polyline [attr.points]="getGraphPointsMax()" class="temp-curve-max" fill="none"></polyline>
+                                            <polygon [attr.points]="getGraphPointsMax() + ' 500,250 0,250'" fill="url(#tempGradientMax)"></polygon>
+
+                                            <!-- Courbe minimale (bleu) -->
+                                            <polyline [attr.points]="getGraphPointsMin()" class="temp-curve-min" fill="none"></polyline>
+                                            <polygon [attr.points]="getGraphPointsMin() + ' 500,250 0,250'" fill="url(#tempGradientMin)"></polygon>
 
                                             @for (item of dailyForecast; track $index; let i = $index) {
                                                 <g>
+                                                    <!-- Point max (rouge) -->
                                                     <circle [attr.cx]="50 + i * 100"
-                                                            [attr.cy]="getYPosition(item.main.temp)" r="6"
-                                                            class="data-point"></circle>
+                                                            [attr.cy]="getYPosition(item.main.temp_max || item.main.temp)" r="6"
+                                                            class="data-point-max"></circle>
+
+                                                    <!-- Point min (bleu) -->
+                                                    <circle [attr.cx]="50 + i * 100"
+                                                            [attr.cy]="getYPosition(item.main.temp_min || item.main.temp)" r="6"
+                                                            class="data-point-min"></circle>
 
                                                     <text [attr.x]="50 + i * 100"
-                                                          [attr.y]="getYPosition(item.main.temp) - 15"
-                                                          class="temp-label">
-                                                          {{ item.main.temp | number:'1.0-0' }}°
+                                                          [attr.y]="getYPosition(item.main.temp_max || item.main.temp) - 15"
+                                                          class="temp-label-max">
+                                                          {{ (item.main.temp_max || item.main.temp) | number:'1.0-0' }}°
+                                                    </text>
+
+                                                    <text [attr.x]="50 + i * 100"
+                                                          [attr.y]="getYPosition(item.main.temp_min || item.main.temp) + 20"
+                                                          class="temp-label-min">
+                                                          {{ (item.main.temp_min || item.main.temp) | number:'1.0-0' }}°
                                                     </text>
 
                                                     <image [attr.x]="50 + i * 100 - 20"

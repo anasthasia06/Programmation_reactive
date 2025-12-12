@@ -26,28 +26,28 @@ interface WeatherData {
 
 interface ForecastItem {
   dt: number;
-  main: { temp: number, humidity: number, pressure: number };
-  weather: [{ icon: string, description: string }];
-  wind: { speed: number };
+  main: { temp: number, temp_max?: number, temp_min?: number, humidity: number, pressure: number };
+  weather: [{ icon: string, description: string }];
+  wind: { speed: number };
 }
 
 interface ProcessedForecast {
-  daily: ForecastItem[];
-  hourly: ForecastItem[];
+  daily: ForecastItem[];
+  hourly: ForecastItem[];
 }
 
 interface GraphDataPoint {
-    time: number; // dt * 1000
-    value: number;
-    icon?: string;
+    time: number; // dt * 1000
+    value: number;
+    icon?: string;
 }
 
 @Component({
-  selector: 'app-today',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './today.component.html',
-  styleUrls: ['./today.component.css']
+  selector: 'app-today',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './today.component.html',
+  styleUrls: ['./today.component.css']
 })
 export class TodayComponent implements OnInit, OnDestroy {
  
@@ -123,46 +123,44 @@ export class TodayComponent implements OnInit, OnDestroy {
     this.applyTheme(this.isDarkModeSubject.getValue());
    
     // Tente de charger la localisation actuelle au démarrage
-    this.getLocation();
+    // this.getLocation();
 
-    this.timerSubscription = interval(1000)
-      .pipe(startWith(0))
-      .subscribe(() => {
-        if (this.weather) {
-          this.updateCityTime(this.weather.timezone);
-        } else {
-          this.cityTimestamp = new Date();
-        }
-      });
+    this.timerSubscription = interval(1000)
+      .pipe(startWith(0))
+      .subscribe(() => {
+        if (this.weather) {
+          this.cityTimestamp = this.calculateCityTime(this.weather.timezone);
+        } else {
+          this.cityTimestamp = new Date();
+        }
+      });
   }
 
-  ngOnDestroy(): void {
-    if (this.timerSubscription) {
-      this.timerSubscription.unsubscribe();
-    }
-    if (this.weatherSubscription) {
-      this.weatherSubscription.unsubscribe();
-    }
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
+  ngOnDestroy(): void {
+    if (this.timerSubscription) {
+      this.timerSubscription.unsubscribe();
+    }
+    if (this.weatherSubscription) {
+      this.weatherSubscription.unsubscribe();
+    }
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
 
-  private applyTheme(isDark: boolean): void {
-    document.body.className = isDark ? 'dark-theme' : 'light-theme';
-  }
+  private applyTheme(isDark: boolean): void {
+    document.body.className = isDark ? 'dark-theme' : 'light-theme';
+  }
 
-  toggleMode(): void {
-    const newMode = !this.isDarkModeSubject.getValue();
-    this.isDarkModeSubject.next(newMode);
-    this.applyTheme(newMode);
-  }
+  toggleMode(): void {
+    const newMode = !this.isDarkModeSubject.getValue();
+    this.isDarkModeSubject.next(newMode);
+    this.applyTheme(newMode);
+  }
 
-  toggleForecastView(): void {
-    this.isGraphView = !this.isGraphView;
-  }
-
-
+  toggleForecastView(): void {
+    this.isGraphView = !this.isGraphView;
+  }
     /**
      * Bascule la vue du graphique horaire entre les différents types de données.
      * Si ce n'est pas la température, ouvre la modal.
@@ -348,55 +346,70 @@ export class TodayComponent implements OnInit, OnDestroy {
 
   getMaxTemp(): number {
     if (this.dailyForecast.length === 0) return 30;
-    return Math.max(...this.dailyForecast.map(item => item.main.temp));
-  }
+    return Math.max(...this.dailyForecast.map(item => item.main.temp_max || item.main.temp));
+  }
 
-  getMinTemp(): number {
-    if (this.dailyForecast.length === 0) return 0;
-    return Math.min(...this.dailyForecast.map(item => item.main.temp));
-  }
+  getMinTemp(): number {
+    if (this.dailyForecast.length === 0) return 0;
+    return Math.min(...this.dailyForecast.map(item => item.main.temp_min || item.main.temp));
+  }
 
-  getYPosition(temp: number): number {
-    const maxTemp = this.getMaxTemp();
-    const minTemp = this.getMinTemp();
-    const range = maxTemp - minTemp || 10;
+  getYPosition(temp: number): number {
+    const maxTemp = this.getMaxTemp();
+    const minTemp = this.getMinTemp();
+    const range = maxTemp - minTemp || 10;
 
-    return 250 - ((temp - minTemp) / range * 200);
-  }
+    return 250 - ((temp - minTemp) / range * 200);
+  }
 
-  getGraphPoints(): string {
-    if (this.dailyForecast.length === 0) return '';
-    const points = this.dailyForecast.map((item, index) => {
-      const x = 50 + index * 100; // Espacement horizontal
-      const y = this.getYPosition(item.main.temp); // Position Y
-      return `${x},${y}`;
-    }).join(' ');
- 
-    return points;
-  }
+  getGraphPoints(): string {
+    if (this.dailyForecast.length === 0) return '';
+    const points = this.dailyForecast.map((item, index) => {
+      const x = 50 + index * 100;
+      const y = this.getYPosition(item.main.temp);
+      return `${x},${y}`;
+    }).join(' ');
 
-  updateCityTime(timezoneOffsetSeconds: number): void {
-    const localTime = new Date();
-    const utcTime = localTime.getTime() + (localTime.getTimezoneOffset() * 60000);
-    this.cityTimestamp = new Date(utcTime + (timezoneOffsetSeconds * 1000));
-  }
+    return points;
+  }
 
-  searchCity(): void {
-    if (!this.cityName.trim()) return;
-    this.weatherService.searchByCity(this.cityName);
-  }
+  // Nouvelle méthode pour la courbe des températures maximales (rouge)
+  getGraphPointsMax(): string {
+    if (this.dailyForecast.length === 0) return '';
+    const points = this.dailyForecast.map((item, index) => {
+      const x = 50 + index * 100;
+      const y = this.getYPosition(item.main.temp_max || item.main.temp);
+      return `${x},${y}`;
+    }).join(' ');
+    return points;
+  }
 
-  getLocation(): void {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          // Utilise la méthode réactive du service pour lancer la recherche
-          this.weatherService.searchByCoords(latitude, longitude);
-        },
-        (error) => {
-          console.error('Geolocation error:', error);
-          alert('Geolocation not supported or denied. Please ensure you have granted location access.');
+  // Nouvelle méthode pour la courbe des températures minimales (bleu)
+  getGraphPointsMin(): string {
+    if (this.dailyForecast.length === 0) return '';
+    const points = this.dailyForecast.map((item, index) => {
+      const x = 50 + index * 100;
+      const y = this.getYPosition(item.main.temp_min || item.main.temp);
+      return `${x},${y}`;
+    }).join(' ');
+    return points;
+  }
+
+  searchCity(): void {
+    if (!this.cityName.trim()) return;
+    this.weatherService.searchByCity(this.cityName);
+  }
+
+  getLocation(): void {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          // Utilise la méthode réactive du service pour lancer la recherche
+          this.weatherService.searchByCoords(latitude, longitude);
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
         }
       );
     } else {
@@ -405,37 +418,55 @@ export class TodayComponent implements OnInit, OnDestroy {
   }
 
   private processForecast(list: any[]): ProcessedForecast {
-    const dailyMap = new Map<string, ForecastItem>();
-    const hourlyForecast: ForecastItem[] = [];
+    const dailyMap = new Map<string, any[]>(); // Stocker tous les items par jour
+    const hourlyForecast: ForecastItem[] = [];
 
-    const now = new Date();
-    let hourlyCount = 0;
+    const now = new Date();
+    let hourlyCount = 0;
 
-    for (const item of list) {
-      const date = new Date(item.dt * 1000);
-      const dateString = date.toISOString().split('T')[0];
+    // Grouper tous les éléments par jour
+    for (const item of list) {
+      const date = new Date(item.dt * 1000);
+      const dateString = date.toISOString().split('T')[0];
 
-      if (!dailyMap.has(dateString)) {
-        dailyMap.set(dateString, item);
-      }
+      if (!dailyMap.has(dateString)) {
+        dailyMap.set(dateString, []);
+      }
+      dailyMap.get(dateString)!.push(item);
 
-      if (date.getTime() > now.getTime() && hourlyCount < 8) {
-        hourlyForecast.push(item);
-        hourlyCount++;
-      }
-    }
+      if (date.getTime() > now.getTime() && hourlyCount < 8) {
+        hourlyForecast.push(item);
+        hourlyCount++;
+      }
+    }
 
-    this.dailyForecast = Array.from(dailyMap.values()).slice(0, 5);
-    this.hourlyForecast = hourlyForecast;
+    // Calculer les min/max pour chaque jour
+    this.dailyForecast = Array.from(dailyMap.entries())
+      .slice(0, 5)
+      .map(([dateString, items]) => {
+        const temps = items.map(item => item.main.temp);
+        const maxTemp = Math.max(...temps);
+        const minTemp = Math.min(...temps);
 
-    return {
-      daily: this.dailyForecast,
-      hourly: this.hourlyForecast
-    };
-  }
+        // Utiliser le premier item comme base et ajouter les min/max calculés
+        const baseItem = items[0];
+        return {
+          ...baseItem,
+          main: {
+            ...baseItem.main,
+            temp_max: maxTemp,
+            temp_min: minTemp
+          }
+        };
+      });
 
-  // Supprimé: getWeatherByCoords et getWeatherByCity sont remplacés par la logique réactive.
+    this.hourlyForecast = hourlyForecast;
 
+    return {
+      daily: this.dailyForecast,
+      hourly: this.hourlyForecast
+    };
+  }
   getForecast(lat: number, lon: number): void {
     // Ce bloc n'est plus nécessaire car le service gère le fetchForecast via switchMap dans setupReactiveStreams
     // Cependant, si vous gardez une ancienne implémentation, assurez-vous qu'elle soit réactive.

@@ -284,6 +284,25 @@
     text-align: left;
 }
 
+.day-item .day-temps {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.day-item .day-temp-max {
+    font-weight: 600;
+    color: #ff4444;
+    font-size: 1rem;
+}
+
+.day-item .day-temp-min {
+    font-weight: 600;
+    color: #4488ff;
+    font-size: 1rem;
+}
+
 .day-item .day-name {
     text-align: right;
     min-width: 110px;
@@ -595,6 +614,20 @@
     text-anchor: middle;
 }
 
+.temp-label-max {
+    fill: #ff4444;
+    font-size: 14px;
+    font-weight: 600;
+    text-anchor: middle;
+}
+
+.temp-label-min {
+    fill: #4488ff;
+    font-size: 14px;
+    font-weight: 600;
+    text-anchor: middle;
+}
+
 .data-point {
     fill: var(--accent-color);
     stroke: var(--card-bg-color);
@@ -606,8 +639,44 @@
     r: 8;
 }
 
+.data-point-max {
+    stroke: #ff4444;
+    stroke-width: 2;
+    fill: #ff4444;
+    transition: r 0.3s;
+}
+
+.data-point-max:hover {
+    r: 8;
+}
+
+.data-point-min {
+    stroke: #4488ff;
+    stroke-width: 2;
+    fill: #4488ff;
+    transition: r 0.3s;
+}
+
+.data-point-min:hover {
+    r: 8;
+}
+
 .temp-curve {
     stroke: var(--accent-color);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.temp-curve-max {
+    stroke: #ff4444;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.temp-curve-min {
+    stroke: #4488ff;
     stroke-width: 3;
     stroke-linecap: round;
     stroke-linejoin: round;
