@@ -149,7 +149,15 @@
     font-weight: 300;
     color: var(--accent-color);
     text-align: center;
+    cursor: pointer; /* Rendre la température cliquable */
 }
+
+/* Style si la température est le type de donnée sélectionné */
+.temp-value.selected-temp {
+    text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+    font-weight: 800;
+}
+
 
 .feels-like, .description-text {
     color: var(--text-color);
@@ -297,19 +305,19 @@
     scrollbar-color: #555 #2e2e2e;
 }
 
-/* Chrome/Edge scrollbar styling */
+/* Chrome/Edge scrollbar styling (Barre de défilement discrète) */
 .hourly-grid::-webkit-scrollbar {
-    height: 8px; /* Hauteur réduite pour la discrétion */
-    background-color: transparent; /* Fond de la scrollbar transparent */
+    height: 8px;
+    background-color: transparent;
 }
 
 .hourly-grid::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.15); /* Pouce très discret */
+    background-color: rgba(255, 255, 255, 0.15);
     border-radius: 4px;
 }
 
 .hourly-grid::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(255, 255, 255, 0.3); /* Un peu plus visible au survol */
+    background-color: rgba(255, 255, 255, 0.3);
 }
 
 
@@ -533,13 +541,13 @@
     margin-right: 15px;
     flex: 0 0 auto;
 }
-.bottom-left .day-temp {
+.bottom-left .day-item .day-temp {
     font-weight: 600;
     color: var(--accent-color);
     flex-grow: 1;
     text-align: left;
 }
-.bottom-left .day-name {
+.bottom-left .day-item .day-name {
     min-width: 110px;
     font-size: 0.95rem;
     text-align: right;
@@ -562,13 +570,13 @@
     width: 36px; /* slightly larger icons */
     margin-right: 12px;
 }
-.bottom-left .day-temp {
+.bottom-left .day-item .day-temp {
     font-size: 1.05rem;
     font-weight: 700;
     color: var(--accent-color);
     margin-right: 8px;
 }
-.bottom-left .day-name {
+.bottom-left .day-item .day-name {
     min-width: 120px;
     font-size: 0.95rem;
 }
@@ -841,6 +849,11 @@
     align-items: flex-end;
 }
 .current-weather-card.theme-polish .details-column > div {
+    /* Rendre le div cliquable et ajouter un effet visuel */
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s, color 0.2s;
+    user-select: none;
+
     display: flex;
     align-items: center;
     gap: 12px;
@@ -850,12 +863,98 @@
     min-width: 150px;
     justify-content: flex-end;
 }
-.current-weather-card.theme-polish .details-column > div img,
-.current-weather-card.theme-polish .details-column > div svg { width: 20px; height: 20px; }
-.current-weather-card.theme-polish .details-column > div span { font-size: 0.95rem; }
+
+/* État sélectionné */
+.current-weather-card.theme-polish .details-column > div.selected {
+    background: var(--accent-color); /* Mettre en évidence la sélection */
+    color: var(--card-bg-color); /* Texte sombre sur fond accentué */
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(255, 204, 0, 0.4);
+}
+
+.current-weather-card.theme-polish .details-column > div:hover {
+    background: rgba(255,255,255,0.08); /* Effet au survol */
+}
+
+.current-weather-card.theme-polish .details-column > div.selected:hover {
+    /* Pas de changement au survol si sélectionné */
+    background: var(--accent-color);
+}
 
 /* sun times separator & layout polish */
 .current-weather-card.theme-polish .sun-times-row { padding-top: 22px; }
 .current-weather-card.theme-polish .sun-item { width: 48%; }
 
-/* utility: apply theme-polish to the DOM roots in HTML by adding class names to card-container elements */
+
+/* =========================================== */
+/* NOUVEAUX STYLES DE MODAL (POP-UP) */
+/* =========================================== */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85); /* Fond noir très foncé semi-transparent */
+    z-index: 1000; /* Assurez-vous qu'elle est au-dessus de tout */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px); /* Effet de flou moderne */
+    transition: opacity 0.3s ease;
+}
+
+.modal-content {
+    background-color: var(--card-bg-color);
+    padding: 25px;
+    border-radius: 16px;
+    max-width: 90%;
+    width: 700px; /* Largeur fixe pour le graphique */
+    max-height: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+    transform: translateY(0);
+    transition: transform 0.3s ease;
+    overflow-y: auto; /* Permet le défilement si le contenu est trop haut */
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 15px;
+}
+
+.modal-header .card-title {
+    margin: 0;
+    font-size: 1.6rem;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-size: 1.5rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.btn-close:hover {
+    opacity: 1;
+}
+
+.hourly-graph-modal .hourly-graph-svg {
+    /* Le SVG dans la modal prendra toute la largeur du conteneur */
+    width: 100%;
+    height: 400px;
+}
+
+/* CORRECTION DE LISIBILITÉ: met en blanc le texte de l'axe X dans les SVGs */
+.hourly-graph .hourly-graph-svg .time-label,
+.hourly-graph-modal .hourly-graph-svg .time-label {
+    fill: var(--text-color); /* Utilise la couleur de texte principale (blanc/clair) */
+    font-weight: 500;
+}
