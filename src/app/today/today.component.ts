@@ -50,7 +50,7 @@ export class TodayComponent implements OnInit, OnDestroy {
   dailyForecast: ForecastItem[] = [];
   hourlyForecast: ForecastItem[] = [];
   cityTimestamp: Date = new Date();
-
+  gridLines = [0, 1, 2, 3, 4];
   isDarkMode: boolean = true; // Default to dark mode
   isGraphView: boolean = false;  // Vue par défaut en cartes (false = cartes, true = graphique)
 
