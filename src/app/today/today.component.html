@@ -77,7 +77,7 @@
 
             <div class="search-location-group d-flex flex-grow-1 justify-content-center">
                 <div class="input-group search-bar shadow-sm">
-                    <span class="input-group-text search-icon">🔍</span>
+                    <span class="input-group-text search-icon" (click)="searchCity()" style="cursor: pointer;">🔍</span>
                     <input type="text" class="form-control"
                            placeholder="Search your favorite city..."
                            [(ngModel)]="cityName" (keyup.enter)="searchCity()">

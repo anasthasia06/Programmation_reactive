@@ -172,9 +172,9 @@ export class TodayComponent implements OnInit, OnDestroy {
 
         if (type !== 'temp') {
             this.isModalOpen = true;
-            if (type === 'humidity') this.modalTitle = 'Prévisions d\'Humidité Heure par Heure';
-            if (type === 'wind') this.modalTitle = 'Prévisions de Vent Heure par Heure';
-            if (type === 'pressure') this.modalTitle = 'Prévisions de Pression Heure par Heure';
+            if (type === 'humidity') this.modalTitle = 'Humidity predictions hour by hour';
+            if (type === 'wind') this.modalTitle = 'Wind predictions hour by hour';
+            if (type === 'pressure') this.modalTitle = 'Pressure predictions hour by hour';
 
         } else {
             // Si l'utilisateur clique sur la température, on ferme la modal (si elle était ouverte)
