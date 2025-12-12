@@ -1,7 +1,6 @@
 <div class="row justify-content-center">
     <div class="col-12 col-lg-10">
 
-        <!-- 🔄 LOADING INDICATOR -->
         @if (loading$ | async) {
             <div class="alert alert-warning alert-loading text-center mb-3">
                 <span class="spinner-border spinner-border-sm me-2"></span>
@@ -9,7 +8,6 @@
             </div>
         }
 
-        <!-- 🔍 SEARCH + DARK MODE BAR -->
         <div class="d-flex align-items-center justify-content-center mb-4 control-bar">
 
             <div class="dark-mode-container mr-3">
@@ -33,11 +31,9 @@
 
         </div>
 
-        <!-- 🌦️ MAIN WEATHER ROW -->
         @if (weather$ | async; as weather) {
             <div class="main-row">
 
-                <!-- 🟦 LEFT CARD -->
                 <div class="left-card">
                     <div class="card-container main-info-card theme-polish">
                         <h4 class="city-name">
@@ -48,13 +44,11 @@
                     </div>
                 </div>
 
-                <!-- 🟧 RIGHT CARD -->
                 <div class="right-card">
                     <div class="card-container current-weather-card theme-polish">
 
                         <div class="weather-main-row">
 
-                            <!-- TEMP COLUMN -->
                             <div class="temp-column">
                                 <p class="temp-value">{{ weather.main.temp | number:'1.0-0' }}°C</p>
                                 <p class="feels-like">
@@ -63,13 +57,11 @@
                                 <p class="description-text">{{ weather.weather[0].description }}</p>
                             </div>
 
-                            <!-- ICON COLUMN -->
                             <div class="icon-column text-center">
                                 <img class="weather-icon-large"
                                      [src]="'http://openweathermap.org/img/w/' + weather.weather[0].icon + '.png'">
                             </div>
 
-                            <!-- DETAILS COLUMN -->
                             <div class="details-column">
                                 <div>Humidity: {{ weather.main.humidity }}%</div>
                                 <div>Wind: {{ weather.wind.speed }} km/h</div>
@@ -99,7 +91,6 @@
             </div>
         }
 
-        <!-- BOTTOM ROW -->
         @if (processedForecast$ | async; as forecast) {
             <div class="main-row">
                 @if (forecast.daily.length > 0) {
@@ -113,7 +104,6 @@
                                 </button>
                             </div>
 
-                            <!-- CARD VIEW -->
                             @if (!isGraphView) {
                                 @for (item of forecast.daily; track $index) {
                                     <div class="day-item">
@@ -124,7 +114,6 @@
                                 }
                             }
 
-                            <!-- GRAPH VIEW -->
                             @if (isGraphView) {
                                 <div class="graph-view">
                                     <div class="temp-graph">
@@ -138,7 +127,7 @@
                                                 [attr.y2]="50 + i * 40"
                                                 class="grid-line">
                                                 </line>
-                                            } 
+                                            }
 
                                             <polyline [attr.points]="getGraphPoints()" class="temp-curve" fill="none"></polyline>
                                             <defs>
@@ -156,19 +145,19 @@
                                                             class="data-point"></circle>
 
                                                     <text [attr.x]="50 + i * 100"
-                                                        [attr.y]="getYPosition(item.main.temp) - 15"
-                                                        class="temp-label">
-                                                        {{ item.main.temp | number:'1.0-0' }}°
+                                                          [attr.y]="getYPosition(item.main.temp) - 15"
+                                                          class="temp-label">
+                                                          {{ item.main.temp | number:'1.0-0' }}°
                                                     </text>
 
                                                     <image [attr.x]="50 + i * 100 - 20"
-                                                        [attr.y]="255" width="40" height="40"
-                                                        [attr.href]="'http://openweathermap.org/img/w/' + item.weather[0].icon + '.png'"></image>
+                                                           [attr.y]="255" width="40" height="40"
+                                                           [attr.href]="'http://openweathermap.org/img/w/' + item.weather[0].icon + '.png'"></image>
 
                                                     <text [attr.x]="50 + i * 100"
-                                                        [attr.y]="305"
-                                                        class="day-label-svg">
-                                                        {{ item.dt * 1000 | date: 'EEE' }}
+                                                          [attr.y]="305"
+                                                          class="day-label-svg">
+                                                          {{ item.dt * 1000 | date: 'EEE' }}
                                                     </text>
                                                 </g>
                                             }
