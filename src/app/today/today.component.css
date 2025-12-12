@@ -284,19 +284,44 @@
 /* Hourly Forecast */
 .hourly-grid {
     display: flex;
-    justify-content: center;
-    overflow-x: auto;
+    justify-content: flex-start; /* Aligner au début pour le défilement */
+    flex-wrap: nowrap; /* Force tous les blocs à rester sur une seule ligne */
+    overflow-x: auto; /* Active le défilement horizontal */
+    overflow-y: hidden; /* Cache le défilement vertical */
     gap: 10px; /* smaller gap */
     padding: 6px 4px; /* slightly smaller padding */
+    width: 100%; /* fill full width */
+
+    /* Styles pour la scrollbar (Firefox) */
+    scrollbar-width: thin;
+    scrollbar-color: #555 #2e2e2e;
 }
 
+/* Chrome/Edge scrollbar styling */
+.hourly-grid::-webkit-scrollbar {
+    height: 8px; /* Hauteur réduite pour la discrétion */
+    background-color: transparent; /* Fond de la scrollbar transparent */
+}
+
+.hourly-grid::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.15); /* Pouce très discret */
+    border-radius: 4px;
+}
+
+.hourly-grid::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.3); /* Un peu plus visible au survol */
+}
+
+
 .hourly-item {
+    flex: 0 0 auto; /* Empêche l'élément de grandir et force sa taille minimale */
     min-width: 82px; /* reduced width so more items visible */
     background-color: var(--secondary-bg);
     border-radius: 12px;
     padding: 12px 8px; /* reduced padding */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     transition: background-color 0.3s;
+    text-align: center; /* Centrer le contenu à l'intérieur du bloc */
 }
 
 .hourly-item:hover {
@@ -368,17 +393,17 @@
 
 /* STYLE HORIZONTAL DU BLOC METEO */
 .horizontal-weather {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .weather-right {
-  text-align: center;
+    text-align: center;
 }
 
 .weather-icon-large {
-  width: 90px;
+    width: 90px;
 }
 
 /* Cartes */
@@ -390,7 +415,7 @@
     box-shadow: 0px 10px 30px rgba(0,0,0,0.45);
 }
 .weather-main-row {
-  display: flex;
+    display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 10px 0 0 0;
@@ -398,7 +423,7 @@
 }
 
 .temp-column {
-  flex: 1;
+    flex: 1;
 }
 
 .icon-column {
@@ -423,13 +448,13 @@
 }
 
 .description-text {
-  text-transform: capitalize;
-  margin-top: 5px;
-  opacity: .8;
+    text-transform: capitalize;
+    margin-top: 5px;
+    opacity: .8;
 }
 
 .weather-icon-large {
-  width: 90px;
+    width: 90px;
 }
 
 .sun-times-row {
@@ -522,6 +547,7 @@
 
 /* Bottom-right: center its contents so hourly forecast appears centered in the card */
 .bottom-right > .card-container {
+    /* Assure le centrage vertical et horizontal */
     justify-content: center;
     align-items: center;
     padding: 20px;
@@ -763,8 +789,8 @@
 }
 
 .sun-time {
-  font-weight: bold;
-  color: #ffcc00;
+    font-weight: bold;
+    color: #ffcc00;
 }
 
 /* ===== Overrides & visual polish for top two cards ===== */
@@ -833,4 +859,3 @@
 .current-weather-card.theme-polish .sun-item { width: 48%; }
 
 /* utility: apply theme-polish to the DOM roots in HTML by adding class names to card-container elements */
-
