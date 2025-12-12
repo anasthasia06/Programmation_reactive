@@ -112,6 +112,14 @@ export class TodayComponent implements OnInit, OnDestroy {
 
     // 🔄 4. Get loading state from service
     this.loading$ = this.weatherService.loading$;
+
+    this.weatherService.forecast$.subscribe(forecast => {
+      console.log('Forecast data:', forecast);
+    });
+
+    this.weatherService.weather$.subscribe(weather => {
+      console.log('Weather data:', weather);
+    });
   }
 
   ngOnInit(): void {
@@ -135,6 +143,8 @@ export class TodayComponent implements OnInit, OnDestroy {
           this.cityTimestamp = new Date();
         }
       });
+
+      console.log('Initial dailyForecast:', this.dailyForecast);
   }
 
   ngOnDestroy(): void {
@@ -205,12 +215,15 @@ export class TodayComponent implements OnInit, OnDestroy {
    */
   getGraphPoints(): string {
     if (this.dailyForecast.length === 0) return '';
-    return this.dailyForecast.map((item, index) => {
-      const x = 50 + index * 100;  // Espacement horizontal de 100px entre chaque jour
-      const y = this.getYPosition(item.main.temp);
+    const points = this.dailyForecast.map((item, index) => {
+      const x = 50 + index * 100; // Espacement horizontal
+      const y = this.getYPosition(item.main.temp); // Position Y
       return `${x},${y}`;
     }).join(' ');
-  } 
+  
+    console.log('Graph points:', points);
+    return points;
+  }
 
     // --- Time Management ---
 
@@ -298,6 +311,7 @@ export class TodayComponent implements OnInit, OnDestroy {
       }
     }
 
+    this.dailyForecast = Array.from(dailyMap.values()).slice(0, 5);
     return {
       daily: Array.from(dailyMap.values()).slice(0, 5),
       hourly: hourlyForecast

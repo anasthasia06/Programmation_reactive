@@ -561,14 +561,14 @@
     text-anchor: middle;
 }
 
-data-point {
+.data-point {
     fill: var(--accent-color);
     stroke: var(--card-bg-color);
     stroke-width: 2;
     transition: r 0.3s;
 }
 
-data-point:hover {
+.data-point:hover {
     r: 8;
 }
 
