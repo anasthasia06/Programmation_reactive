@@ -115,7 +115,7 @@
 
                             <!-- CARD VIEW -->
                             @if (!isGraphView) {
-                                @for (item of dailyForecast; track $index) {
+                                @for (item of forecast.daily; track $index) {
                                     <div class="day-item">
                                         <img [src]="'http://openweathermap.org/img/w/' + item.weather[0].icon + '.png'">
                                         <span class="day-temp">{{ item.main.temp | number:'1.0-0' }}°C</span>
@@ -127,7 +127,6 @@
                             <!-- GRAPH VIEW -->
                             @if (isGraphView) {
                                 <div class="graph-view">
-
                                     <div class="temp-graph">
                                         <svg class="temp-graph-svg" viewBox="0 0 500 320" preserveAspectRatio="xMidYMid meet">
 
@@ -139,19 +138,16 @@
                                                 [attr.y2]="50 + i * 40"
                                                 class="grid-line">
                                                 </line>
-                                            }              
+                                            } 
 
                                             <polyline [attr.points]="getGraphPoints()" class="temp-curve" fill="none"></polyline>
-
                                             <defs>
                                                 <linearGradient id="tempGradient" x1="0" y1="0" x2="0" y2="100%">
                                                     <stop offset="0%" style="stop-color:var(--accent-color);stop-opacity:0.3"></stop>
                                                     <stop offset="100%" style="stop-color:var(--accent-color);stop-opacity:0.05"></stop>
                                                 </linearGradient>
                                             </defs>
-
-                                            <polygon [attr.points]="getGraphPoints() + ' 500,250 0,250'"
-                                                    fill="url(#tempGradient)"></polygon>
+                                            <polygon [attr.points]="getGraphPoints() + ' 500,250 0,250'"fill="url(#tempGradient)"></polygon>
 
                                             @for (item of dailyForecast; track $index; let i = $index) {
                                                 <g>
@@ -178,14 +174,6 @@
                                             }
                                         </svg>
                                     </div>
-
-                                    @for (item of forecast.daily; track $index) {
-                                        <div class="day-item">
-                                            <img [src]="'http://openweathermap.org/img/w/' + item.weather[0].icon + '.png'">
-                                            <span class="day-temp">{{ item.main.temp | number:'1.0-0' }}°C</span>
-                                            <span class="day-name">{{ item.dt * 1000 | date: 'EEEE, MMM dd' }}</span>
-                                        </div>
-                                    }
                                 </div>
                             }
                         </div>
