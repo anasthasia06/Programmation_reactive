@@ -142,7 +142,7 @@ export class WeatherService implements OnDestroy {
   // ============ PRIVATE API METHODS ============
 
   // 1. Search by Coordinates (Current Weather)
-  private getWeatherDataByCoords(lat: number, lon: number): Observable<WeatherData> {
+  getWeatherDataByCoords(lat: number, lon: number): Observable<WeatherData> {
     let params = new HttpParams()
       .set('lat', lat)
       .set('lon', lon)
@@ -167,7 +167,7 @@ export class WeatherService implements OnDestroy {
   }
 
   // 2. Search by City Name (Current Weather)
-  private getWeatherDataByCityName(cityName: string): Observable<WeatherData> {
+  getWeatherDataByCityName(cityName: string): Observable<WeatherData> {
     let params = new HttpParams()
       .set('q', cityName)
       .set('units', 'metric')
@@ -203,7 +203,7 @@ export class WeatherService implements OnDestroy {
   }
 
   // 4. Retrieves 5-day/3-hour forecast
-  private getForecastDataByCoords(lat: number, lon: number): Observable<ForecastData> {
+  getForecastDataByCoords(lat: number, lon: number): Observable<ForecastData> {
     let params = new HttpParams()
       .set('lat', lat)
       .set('lon', lon)
