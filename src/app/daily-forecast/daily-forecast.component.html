@@ -1,0 +1,96 @@
+<div class="card-container forecast-card">
+    <div class="d-flex justify-content-between mb-3">
+        <h3 class="card-title mb-0">5-Day Forecast:</h3>
+
+        <button class="btn btn-sm btn-toggle" (click)="toggleForecastView()">
+            {{ isGraphView ? '📊 Card View' : '📈 Graph View' }}
+        </button>
+    </div>
+
+    @if (!isGraphView) {
+        @for (item of dailyForecast; track $index) {
+            <div class="day-item">
+                <img [src]="'http://openweathermap.org/img/w/' + item.weather[0].icon + '.png'">
+                <div class="day-temps">
+                    <span class="day-temp-max">{{ (item.main.temp_max || item.main.temp) | number:'1.0-0' }}°C</span>
+                    <span class="day-temp-min">{{ (item.main.temp_min || item.main.temp) | number:'1.0-0' }}°C</span>
+                </div>
+                <span class="day-name">{{ item.dt * 1000 | date: 'EEEE, MMM dd' }}</span>
+            </div>
+        }
+    }
+
+    @if (isGraphView) {
+        <div class="graph-view">
+            <div class="temp-graph">
+                <svg class="temp-graph-svg" viewBox="0 0 500 320" preserveAspectRatio="xMidYMid meet">
+
+                    @for (i of [0, 1, 2, 3, 4]; track $index) {
+                        <line
+                        [attr.x1]="0"
+                        [attr.y1]="50 + i * 40"
+                        [attr.x2]="500"
+                        [attr.y2]="50 + i * 40"
+                        class="grid-line">
+                        </line>
+                    }
+
+                    <defs>
+                        <linearGradient id="tempGradientMax" x1="0" y1="0" x2="0" y2="100%">
+                            <stop offset="0%" style="stop-color:#ff4444;stop-opacity:0.2"></stop>
+                            <stop offset="100%" style="stop-color:#ff4444;stop-opacity:0.05"></stop>
+                        </linearGradient>
+                        <linearGradient id="tempGradientMin" x1="0" y1="0" x2="0" y2="100%">
+                            <stop offset="0%" style="stop-color:#4488ff;stop-opacity:0.2"></stop>
+                            <stop offset="100%" style="stop-color:#4488ff;stop-opacity:0.05"></stop>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Courbe maximale (rouge) -->
+                    <polyline [attr.points]="getGraphPointsMax()" class="temp-curve-max" fill="none"></polyline>
+                    <polygon [attr.points]="getGraphPointsMax() + ' 500,250 0,250'" fill="url(#tempGradientMax)"></polygon>
+
+                    <!-- Courbe minimale (bleu) -->
+                    <polyline [attr.points]="getGraphPointsMin()" class="temp-curve-min" fill="none"></polyline>
+                    <polygon [attr.points]="getGraphPointsMin() + ' 500,250 0,250'" fill="url(#tempGradientMin)"></polygon>
+
+                    @for (item of dailyForecast; track $index; let i = $index) {
+                        <g>
+                            <!-- Point max (rouge) -->
+                            <circle [attr.cx]="50 + i * 100"
+                                    [attr.cy]="getYPosition(item.main.temp_max || item.main.temp)" r="6"
+                                    class="data-point-max"></circle>
+
+                            <!-- Point min (bleu) -->
+                            <circle [attr.cx]="50 + i * 100"
+                                    [attr.cy]="getYPosition(item.main.temp_min || item.main.temp)" r="6"
+                                    class="data-point-min"></circle>
+
+                            <text [attr.x]="50 + i * 100"
+                                  [attr.y]="getYPosition(item.main.temp_max || item.main.temp) - 15"
+                                  class="temp-label-max">
+                                  {{ (item.main.temp_max || item.main.temp) | number:'1.0-0' }}°
+                            </text>
+
+                            <text [attr.x]="50 + i * 100"
+                                  [attr.y]="getYPosition(item.main.temp_min || item.main.temp) + 20"
+                                  class="temp-label-min">
+                                  {{ (item.main.temp_min || item.main.temp) | number:'1.0-0' }}°
+                            </text>
+
+                            <image [attr.x]="50 + i * 100 - 20"
+                                   [attr.y]="255" width="40" height="40"
+                                   [attr.href]="'http://openweathermap.org/img/w/' + item.weather[0].icon + '.png'"></image>
+
+                            <text [attr.x]="50 + i * 100"
+                                  [attr.y]="305"
+                                  class="day-label-svg">
+                                  {{ item.dt * 1000 | date: 'EEE' }}
+                            </text>
+                        </g>
+                    }
+                </svg>
+            </div>
+        </div>
+    }
+</div>

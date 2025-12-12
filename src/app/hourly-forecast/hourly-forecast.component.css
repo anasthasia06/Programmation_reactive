@@ -1,0 +1,159 @@
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.btn-toggle {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 5px 15px;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
+}
+
+.btn-toggle:hover {
+    background-color: color-mix(in srgb, var(--accent-color) 80%, black);
+}
+
+/* Hourly Forecast Styles */
+.hourly-grid {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 10px;
+    padding: 6px 4px;
+    width: 100%;
+    scrollbar-width: thin;
+    scrollbar-color: #555 #2e2e2e;
+}
+
+.hourly-grid::-webkit-scrollbar {
+    height: 8px;
+    background-color: transparent;
+}
+
+.hourly-grid::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+}
+
+.hourly-grid::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.hourly-item {
+    flex: 0 0 auto;
+    min-width: 82px;
+    background-color: var(--secondary-bg);
+    border-radius: 12px;
+    padding: 12px 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s;
+    text-align: center;
+}
+
+.hourly-item:hover {
+    background-color: color-mix(in srgb, var(--secondary-bg) 90%, #6c757d);
+}
+
+.hourly-time {
+    font-weight: 600;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+    color: var(--text-color);
+}
+
+.hourly-item img {
+    width: 50px;
+    height: 50px;
+    margin: 5px 0;
+}
+
+.hourly-temp {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    margin: 5px 0;
+}
+
+.hourly-wind {
+    font-size: 0.8rem;
+    color: var(--text-color);
+    opacity: 0.6;
+    margin-top: 5px;
+}
+
+.hourly-graph {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.hourly-graph-svg {
+    width: 100%;
+    height: 100%;
+    max-width: 1200px;
+}
+
+.grid-line {
+    stroke: var(--secondary-bg);
+    stroke-width: 1;
+    opacity: 0.3;
+}
+
+.temp-curve {
+    stroke: var(--accent-color);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.data-point {
+    fill: var(--accent-color);
+    stroke: var(--card-bg-color);
+    stroke-width: 2;
+    transition: r 0.3s;
+}
+
+.data-point:hover {
+    r: 8;
+}
+
+.temp-label {
+    fill: var(--text-color);
+    font-size: 14px;
+    font-weight: 600;
+    text-anchor: middle;
+}
+
+.time-label {
+    fill: var(--text-color);
+    font-size: 12px;
+    text-anchor: middle;
+    font-weight: 500;
+}
+
+.card-container {
+    background: var(--card-bg-color, #2e2e2e);
+    padding: 18px;
+    border-radius: 14px;
+    color: var(--text-color, #fff);
+    box-shadow: 0px 10px 30px rgba(0,0,0,0.45);
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.mt-4 {
+    margin-top: 1.5rem;
+}

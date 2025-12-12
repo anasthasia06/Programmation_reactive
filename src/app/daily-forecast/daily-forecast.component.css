@@ -1,0 +1,159 @@
+/* 5-Day Forecast Styles */
+.day-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--secondary-bg);
+    color: var(--text-color);
+}
+
+.day-item:last-child {
+    border-bottom: none;
+}
+
+.day-item img {
+    width: 30px;
+    margin-right: 15px;
+}
+
+.day-item .day-temp {
+    font-weight: 600;
+    color: var(--accent-color);
+    flex-grow: 1;
+    text-align: left;
+}
+
+.day-item .day-temps {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.day-item .day-temp-max {
+    font-weight: 600;
+    color: #ff4444;
+    font-size: 1rem;
+}
+
+.day-item .day-temp-min {
+    font-weight: 600;
+    color: #4488ff;
+    font-size: 1rem;
+}
+
+.day-item .day-name {
+    text-align: right;
+    min-width: 110px;
+}
+
+.day-label-svg {
+    fill: var(--text-color);
+    font-size: 12px;
+    text-anchor: middle;
+    font-weight: 500;
+}
+
+.temp-label-max {
+    fill: #ff4444;
+    font-size: 14px;
+    font-weight: 600;
+    text-anchor: middle;
+}
+
+.temp-label-min {
+    fill: #4488ff;
+    font-size: 14px;
+    font-weight: 600;
+    text-anchor: middle;
+}
+
+.data-point-max {
+    stroke: #ff4444;
+    stroke-width: 2;
+    fill: #ff4444;
+    transition: r 0.3s;
+}
+
+.data-point-max:hover {
+    r: 8;
+}
+
+.data-point-min {
+    stroke: #4488ff;
+    stroke-width: 2;
+    fill: #4488ff;
+    transition: r 0.3s;
+}
+
+.data-point-min:hover {
+    r: 8;
+}
+
+.temp-curve-max {
+    stroke: #ff4444;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.temp-curve-min {
+    stroke: #4488ff;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.grid-line {
+    stroke: var(--secondary-bg);
+    stroke-width: 1;
+    opacity: 0.3;
+}
+
+.temp-graph {
+    width: 100%;
+    height: 320px;
+}
+
+.temp-graph-svg {
+    width: 100%;
+    height: 100%;
+    max-width: 500px;
+}
+
+.btn-toggle {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 5px 15px;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
+}
+
+.btn-toggle:hover {
+    background-color: color-mix(in srgb, var(--accent-color) 80%, black);
+}
+
+.card-container {
+    background: var(--card-bg-color, #2e2e2e);
+    padding: 18px;
+    border-radius: 14px;
+    color: var(--text-color, #fff);
+    box-shadow: 0px 10px 30px rgba(0,0,0,0.45);
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.graph-view {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

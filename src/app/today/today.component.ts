@@ -11,7 +11,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WeatherService, ForecastData } from '../weather.service';
 import { Observable, BehaviorSubject, combineLatest, Subject, interval, Subscription } from 'rxjs';
-import { map, takeUntil, startWith, switchMap, tap } from 'rxjs/operators'; // <-- AJOUT de 'tap'
+import { map, takeUntil, startWith, switchMap, tap } from 'rxjs/operators';
+import { DailyForecastComponent } from '../daily-forecast/daily-forecast.component';
+import { HourlyForecastComponent } from '../hourly-forecast/hourly-forecast.component';
 
 
 interface WeatherData {
@@ -45,7 +47,7 @@ interface GraphDataPoint {
 @Component({
   selector: 'app-today',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DailyForecastComponent, HourlyForecastComponent],
   templateUrl: './today.component.html',
   styleUrls: ['./today.component.css']
 })
@@ -56,26 +58,24 @@ export class TodayComponent implements OnInit, OnDestroy {
   dailyForecast: ForecastItem[] = [];
   hourlyForecast: ForecastItem[] = [];
   cityTimestamp: Date = new Date();
-  gridLines = [0, 1, 2, 3, 4];
-  isDarkMode: boolean = true;
-  isGraphView: boolean = false;  
- 
-  // PROPRIÉTÉS POUR LA DYNAMIQUE DES GRAPHIQUES
-  selectedDataType: 'temp' | 'humidity' | 'wind' | 'pressure' = 'temp';
-  isModalOpen: boolean = false;
-  modalTitle: string = '';
+  isDarkMode: boolean = true;
 
-  private timerSubscription: Subscription | undefined;
-  private weatherSubscription: Subscription | undefined;
+  // PROPRIÉTÉS POUR LA DYNAMIQUE DES GRAPHIQUES (Modal)
+  selectedDataType: 'temp' | 'humidity' | 'wind' | 'pressure' = 'temp';
+  isModalOpen: boolean = false;
+  modalTitle: string = '';
 
-  // Observable streams
-  weather$: Observable<WeatherData | null>;
-  processedForecast$: Observable<ProcessedForecast>;
-  cityTimestamp$: Observable<Date>;
-  loading$: Observable<boolean>;
+  private timerSubscription: Subscription | undefined;
+  private weatherSubscription: Subscription | undefined;
 
-  private isDarkModeSubject = new BehaviorSubject<boolean>(true);
-  isDarkMode$ = this.isDarkModeSubject.asObservable();
+  // Observable streams
+  weather$!: Observable<WeatherData | null>;
+  processedForecast$!: Observable<ProcessedForecast>;
+  cityTimestamp$!: Observable<Date>;
+  loading$!: Observable<boolean>;
+
+  private isDarkModeSubject = new BehaviorSubject<boolean>(true);
+  isDarkMode$ = this.isDarkModeSubject.asObservable();
 
   private destroy$ = new Subject<void>();
 
@@ -158,9 +158,7 @@ export class TodayComponent implements OnInit, OnDestroy {
     this.applyTheme(newMode);
   }
 
-  toggleForecastView(): void {
-    this.isGraphView = !this.isGraphView;
-  }
+
     /**
      * Bascule la vue du graphique horaire entre les différents types de données.
      * Si ce n'est pas la température, ouvre la modal.
@@ -342,58 +340,7 @@ export class TodayComponent implements OnInit, OnDestroy {
     }
 
 
-    // ====== CALCULS POUR LE GRAPHIQUE SVG (Daily) ======
-
-  getMaxTemp(): number {
-    if (this.dailyForecast.length === 0) return 30;
-    return Math.max(...this.dailyForecast.map(item => item.main.temp_max || item.main.temp));
-  }
-
-  getMinTemp(): number {
-    if (this.dailyForecast.length === 0) return 0;
-    return Math.min(...this.dailyForecast.map(item => item.main.temp_min || item.main.temp));
-  }
-
-  getYPosition(temp: number): number {
-    const maxTemp = this.getMaxTemp();
-    const minTemp = this.getMinTemp();
-    const range = maxTemp - minTemp || 10;
-
-    return 250 - ((temp - minTemp) / range * 200);
-  }
-
-  getGraphPoints(): string {
-    if (this.dailyForecast.length === 0) return '';
-    const points = this.dailyForecast.map((item, index) => {
-      const x = 50 + index * 100;
-      const y = this.getYPosition(item.main.temp);
-      return `${x},${y}`;
-    }).join(' ');
-
-    return points;
-  }
-
-  // Nouvelle méthode pour la courbe des températures maximales (rouge)
-  getGraphPointsMax(): string {
-    if (this.dailyForecast.length === 0) return '';
-    const points = this.dailyForecast.map((item, index) => {
-      const x = 50 + index * 100;
-      const y = this.getYPosition(item.main.temp_max || item.main.temp);
-      return `${x},${y}`;
-    }).join(' ');
-    return points;
-  }
-
-  // Nouvelle méthode pour la courbe des températures minimales (bleu)
-  getGraphPointsMin(): string {
-    if (this.dailyForecast.length === 0) return '';
-    const points = this.dailyForecast.map((item, index) => {
-      const x = 50 + index * 100;
-      const y = this.getYPosition(item.main.temp_min || item.main.temp);
-      return `${x},${y}`;
-    }).join(' ');
-    return points;
-  }
+// ====== CALCULS POUR LE GRAPHIQUE SVG (Daily) - Supprimés, déplacés vers DailyForecastComponent ======
 
   searchCity(): void {
     if (!this.cityName.trim()) return;
