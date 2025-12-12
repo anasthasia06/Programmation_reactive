@@ -34,7 +34,7 @@
         </div>
 
         <!-- 🌦️ MAIN WEATHER ROW -->
-        @if (weather$ | async as weather) {
+        @if (weather$ | async; as weather) {
             <div class="main-row">
 
                 <!-- 🟦 LEFT CARD -->
@@ -100,7 +100,7 @@
         }
 
         <!-- BOTTOM ROW -->
-        @if (processedForecast$ | async as forecast) {
+        @if (processedForecast$ | async; as forecast) {
 
             @if (forecast.daily.length > 0) {
                 <div class="bottom-left">
