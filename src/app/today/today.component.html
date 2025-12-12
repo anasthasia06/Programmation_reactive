@@ -1,0 +1,148 @@
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-10">
+
+        <!-- 🔄 LOADING INDICATOR - Shows HTTP request progress -->
+        <div *ngIf="loading$ | async" class="alert alert-warning alert-loading text-center mb-3">
+            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            Loading weather data...
+        </div>
+
+        <!-- 🔍 SEARCH + DARK MODE BAR -->
+        <div class="d-flex align-items-center justify-content-center mb-4 control-bar">
+
+            <div class="dark-mode-container mr-3">
+                <button class="btn btn-sm mode-switch-btn" (click)="toggleMode()">
+                    {{ (isDarkMode$ | async) ? 'Light Mode' : 'Dark Mode' }}
+                </button>
+            </div>
+
+            <div class="search-location-group d-flex flex-grow-1 justify-content-center">
+
+                <div class="input-group search-bar shadow-sm">
+                    <span class="input-group-text search-icon">🔍</span>
+                    <input type="text"
+                           class="form-control"
+                           placeholder="Search your favorite city..."
+                           [(ngModel)]="cityName"
+                           (keyup.enter)="searchCity()">
+                </div>
+
+                <button class="btn btn-location" (click)="getLocation()">
+                    Current Location
+                </button>
+            </div>
+
+        </div>
+
+        <!-- 🌦️ MAIN WEATHER ROW -->
+        <div class="main-row" *ngIf="weather$ | async as weather">
+
+            <!-- 🟦 LEFT CARD: CITY & DATE -->
+            <div class="left-card">
+                <div class="card-container main-info-card theme-polish">
+                    <h4 class="city-name">{{ weather.name }}, {{ weather.sys.country }}</h4>
+                    <p class="current-time">{{ (cityTimestamp$ | async) | date: 'HH:mm' }}</p>
+                    <p class="current-date">{{ (cityTimestamp$ | async) | date: 'EEEE, MMM dd' }}</p>
+                </div>
+            </div>
+
+            <!-- 🟧 RIGHT CARD: CURRENT WEATHER -->
+            <div class="right-card">
+                <div class="card-container current-weather-card theme-polish">
+
+    <div class="weather-main-row">
+
+        <!-- COLONNE 1 : TEMP + DESCRIPTION -->
+        <div class="temp-column">
+            <p class="temp-value">{{ weather.main.temp | number:'1.0-0' }}°C</p>
+            <p class="feels-like">Feels Like: {{ weather.main.feels_like | number:'1.0-0' }}°C</p>
+            <p class="description-text">{{ weather.weather[0].description }}</p>
+        </div>
+
+        <!-- COLONNE 2 : ICÔNE MÉTÉO -->
+        <div class="icon-column text-center">
+            <img class="weather-icon-large"
+                 [src]="'http://openweathermap.org/img/w/' + weather.weather[0].icon + '.png'">
+        </div>
+
+        <!-- COLONNE 3 : DETAILS -->
+        <div class="details-column">
+            <div>Humidity: {{ weather.main.humidity }}%</div>
+            <div>Wind: {{ weather.wind.speed }} km/h</div>
+            <div>Pressure: {{ weather.main.pressure }} hPa</div>
+            <div>UV Index: N/A</div>
+        </div>
+
+    </div>
+
+    <div class="sun-times-row">
+        <div class="sun-item">
+            ☀️
+            <p>Sunrise</p>
+            <p class="sun-time">{{ weather.sys.sunrise * 1000 | date: 'shortTime' }}</p>
+        </div>
+
+        <div class="sun-item">
+            🌙
+            <p>Sunset</p>
+            <p class="sun-time">{{ weather.sys.sunset * 1000 | date: 'shortTime' }}</p>
+        </div>
+    </div>
+
+</div>
+
+            </div>
+
+        </div>
+
+        <!-- BOTTOM ROW: 5-DAY + HOURLY (side-by-side) -->
+        <div class="bottom-row" *ngIf="processedForecast$ | async as forecast">
+
+            <div class="bottom-left" *ngIf="forecast.daily.length > 0">
+                <div class="card-container forecast-card">
+                    <h3 class="card-title text-center">5-Day Forecast:</h3>
+
+                    <div *ngFor="let item of forecast.daily" class="day-item">
+                        <img [src]="'http://openweathermap.org/img/w/' + item.weather[0].icon + '.png'" alt="icon">
+                        <span class="day-temp">{{ item.main.temp | number:'1.0-0' }}°C</span>
+                        <span class="day-name">{{ item.dt * 1000 | date: 'EEEE, MMM dd' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-right" *ngIf="forecast.hourly.length > 0">
+                <div class="card-container forecast-card">
+                    <h3 class="card-title text-center">Hourly Forecast:</h3>
+
+                    <div class="hourly-toggle d-flex justify-content-center mb-3">
+                        <button class="btn btn-sm me-2" (click)="showHourlyChart = false" [class.active]="!showHourlyChart">Grid</button>
+                        <button class="btn btn-sm" (click)="showHourlyChart = true" [class.active]="showHourlyChart">Chart</button>
+                    </div>
+
+                    <div *ngIf="!showHourlyChart" class="hourly-grid">
+                        <div *ngFor="let hour of forecast.hourly" class="hourly-item text-center">
+                            <p class="hourly-time">{{ hour.dt * 1000 | date: 'HH:mm' }}</p>
+                            <img [src]="'http://openweathermap.org/img/w/' + hour.weather[0].icon + '.png'" alt="icon">
+                            <p class="hourly-temp">{{ hour.main.temp | number:'1.0-0' }}°C</p>
+                            <p class="hourly-wind">{{ hour.wind.speed | number:'1.0-0' }} km/h</p>
+                        </div>
+                    </div>
+
+                    <div *ngIf="showHourlyChart" class="hourly-chart" style="height:260px">
+                        <canvas baseChart
+                                [data]="chartData"
+                                [options]="chartOptions"
+                                [type]="chartType">
+                        </canvas>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div *ngIf="!(weather$ | async)" class="alert alert-info text-center mt-3">
+            Loading data... Please enter a city or allow location access.
+        </div>
+    </div>
+</div>

@@ -1,0 +1,14 @@
+@import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
+
+:root{
+  --card-bg-color: #3a3a3a;
+  --secondary-bg: #464646;
+  --text-color: #ffffff;
+  --accent-color: #ffcc00;
+  --shadow-color: rgba(0,0,0,0.5);
+}
+
+html,body{height:100%;margin:0;padding:0;background:#222;color:var(--text-color);font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
+
+/* minimal container reset so our card looks centered */
+body > app-today { display: block; }
