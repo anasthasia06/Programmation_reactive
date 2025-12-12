@@ -1,0 +1,217 @@
+<!--
+    COMPOSANT TODAY - AFFICHAGE MÉTÉO
+    Ce template affiche:
+    - Barre de recherche et boutons de contrôle (thème, géolocalisation)
+    - Informations météo actuelles (température, conditions, etc.)
+    - Prévisions sur 5 jours (vue cartes ou graphique)
+    - Prévisions horaires (8 prochaines heures)
+-->
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-10">
+
+        <!-- ========== BARRE DE CONTRÔLE ========== -->
+        <div class="d-flex align-items-center justify-content-center mb-4 control-bar">
+
+            <!-- Bouton pour basculer entre mode clair/sombre -->
+            <div class="dark-mode-container mr-3">
+                <button class="btn btn-sm mode-switch-btn" (click)="toggleMode()">
+                    {{ isDarkMode ? 'Light Mode' : 'Dark Mode' }}
+                </button>
+            </div>
+
+            <!-- Groupe recherche + géolocalisation -->
+            <div class="search-location-group d-flex flex-grow-1 justify-content-center">
+
+                <!-- Barre de recherche de ville -->
+                <div class="input-group search-bar shadow-sm">
+                    <span class="input-group-text search-icon">🔍</span>
+                    <input type="text"
+                           class="form-control"
+                           placeholder="Search your favorite city..."
+                           [(ngModel)]="cityName"
+                           (keyup.enter)="getWeatherByCity()">
+                </div>
+
+                <!-- Bouton de géolocalisation -->
+                <button class="btn btn-location" (click)="getLocation()">
+                    Current Location
+                </button>
+            </div>
+
+        </div>
+
+        <!-- ========== CONTENU MÉTÉO (affiché uniquement si des données sont disponibles) ========== -->
+        <div class="row justify-content-center" *ngIf="weather">
+
+            <!-- ========== CARTE 1: Informations ville et date/heure ========== -->
+            <div class="col-12 col-md-6 mb-4">
+                <div class="card-container main-info-card">
+                    <h4 class="city-name">{{ weather.name }}, {{ weather.sys.country }}</h4>
+                    <p class="current-time">{{ cityTimestamp | date: 'HH:mm' }}</p>
+                    <p class="current-date">{{ cityTimestamp | date: 'EEEE, MMM dd' }}</p>
+                </div>
+            </div>
+
+            <!-- ========== CARTE 2: Météo actuelle détaillée ========== -->
+            <div class="col-12 col-md-6 mb-4">
+                <div class="card-container current-weather-card">
+
+                    <div class="weather-details-header row align-items-center mb-3">
+
+                        <!-- Température principale et description -->
+                        <div class="col-6 text-center">
+                            <p class="display-3 temp-value">{{ weather.main.temp | number:'1.0-0' }}°C</p>
+                            <p class="feels-like">Feels Like: {{ weather.main.feels_like | number:'1.0-0' }}°C</p>
+                            <p class="description-text text-uppercase">{{ weather.weather[0].description }}</p>
+                        </div>
+
+                        <!-- Icône météo et détails supplémentaires -->
+                        <div class="col-6 detail-icon-group text-center">
+                            <img class="weather-icon-large"
+                                 [src]="'http://openweathermap.org/img/w/' + weather.weather[0].icon + '.png'"
+                                 alt="weather icon">
+
+                            <!-- Grille 2x2 des détails (humidité, vent, pression, UV) -->
+                            <div class="detail-grid-small mt-3">
+                                <div class="detail-item-small"><span>Humidity</span> <span>{{ weather.main.humidity }}%</span></div>
+                                <div class="detail-item-small"><span>Wind Speed</span> <span>{{ weather.wind.speed | number:'1.0-0' }} km/h</span></div>
+                                <div class="detail-item-small"><span>Pressure</span> <span>{{ weather.main.pressure }} hpa</span></div>
+                                <div class="detail-item-small"><span>UV Index</span> <span>N/A</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Heures de lever et coucher du soleil -->
+                    <div class="sun-times-row pt-3 border-top sun-flex-container">
+
+                        <div class="sun-item text-center">
+                            <span class="sun-icon">☀️</span>
+                            <p class="sun-label">Sunrise</p>
+                            <p class="sun-time">{{ weather.sys.sunrise * 1000 | date: 'shortTime' }}</p>
+                        </div>
+
+                        <div class="sun-item text-center">
+                            <span class="sun-icon">🌙</span>
+                            <p class="sun-label">Sunset</p>
+                            <p class="sun-time">{{ weather.sys.sunset * 1000 | date: 'shortTime' }}</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ========== CARTE 3: Prévisions sur 5 jours ========== -->
+            <div class="col-12 col-md-6 mb-4" *ngIf="dailyForecast.length > 0">
+                <div class="card-container forecast-card">
+                    <!-- En-tête avec bouton pour basculer entre vue cartes et vue graphique -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="card-title mb-0">5-Day Forecast:</h3>
+                        <button class="btn btn-sm btn-toggle" (click)="toggleForecastView()">
+                            {{ isGraphView ? '📊 Card View' : '📈 Graph View' }}
+                        </button>
+                    </div>
+
+                    <!-- Vue en cartes (liste des jours) -->
+                    <div *ngIf="!isGraphView">
+                        <div *ngFor="let item of dailyForecast" class="day-item">
+                            <img [src]="'http://openweathermap.org/img/w/' + item.weather[0].icon + '.png'" alt="icon">
+                            <span class="day-temp">{{ item.main.temp | number:'1.0-0' }}°C</span>
+                            <span class="day-name">{{ item.dt * 1000 | date: 'EEEE, MMM dd' }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Vue graphique (courbe de température SVG) -->
+                    <div *ngIf="isGraphView" class="graph-view">
+                        <div class="temp-graph">
+                            <svg class="temp-graph-svg" viewBox="0 0 500 320" preserveAspectRatio="xMidYMid meet">
+                                <!-- Lignes de grille horizontales pour repères -->
+                                <line *ngFor="let i of [0, 1, 2, 3, 4]"
+                                      [attr.x1]="0"
+                                      [attr.y1]="50 + i * 40"
+                                      [attr.x2]="500"
+                                      [attr.y2]="50 + i * 40"
+                                      class="grid-line" />
+
+                                <!-- Courbe de température (polyline reliant tous les points) -->
+                                <polyline
+                                    [attr.points]="getGraphPoints()"
+                                    class="temp-curve"
+                                    fill="none" />
+
+                                <!-- Définition du dégradé pour la zone sous la courbe -->
+                                <defs>
+                                    <linearGradient id="tempGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" style="stop-color:var(--accent-color);stop-opacity:0.3" />
+                                        <stop offset="100%" style="stop-color:var(--accent-color);stop-opacity:0.05" />
+                                    </linearGradient>
+                                </defs>
+                                <!-- Zone remplie sous la courbe avec dégradé -->
+                                <polygon
+                                    [attr.points]="getGraphPoints() + ' 500,250 0,250'"
+                                    fill="url(#tempGradient)" />
+
+                                <!-- Points de données pour chaque jour -->
+                                <g *ngFor="let item of dailyForecast; let i = index">
+                                    <!-- Cercle sur la courbe -->
+                                    <circle
+                                        [attr.cx]="50 + i * 100"
+                                        [attr.cy]="getYPosition(item.main.temp)"
+                                        r="6"
+                                        class="data-point" />
+
+                                    <!-- Valeur de température au-dessus du point -->
+                                    <text
+                                        [attr.x]="50 + i * 100"
+                                        [attr.y]="getYPosition(item.main.temp) - 15"
+                                        class="temp-label">
+                                        {{ item.main.temp | number:'1.0-0' }}°
+                                    </text>
+
+                                    <!-- Icône météo en bas -->
+                                    <image
+                                        [attr.x]="50 + i * 100 - 20"
+                                        [attr.y]="255"
+                                        width="40"
+                                        height="40"
+                                        [attr.href]="'http://openweathermap.org/img/w/' + item.weather[0].icon + '.png'" />
+
+                                    <!-- Label du jour (abrégé) sous l'icône -->
+                                    <text
+                                        [attr.x]="50 + i * 100"
+                                        [attr.y]="305"
+                                        class="day-label-svg">
+                                        {{ item.dt * 1000 | date: 'EEE' }}
+                                    </text>
+                                </g>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== CARTE 4: Prévisions horaires ========== -->
+            <div class="col-12 col-md-6 mb-4" *ngIf="hourlyForecast.length > 0">
+                <div class="card-container forecast-card">
+                    <h3 class="card-title">Hourly Forecast:</h3>
+                    <!-- Grille horizontale scrollable pour les 8 prochaines heures -->
+                    <div class="hourly-grid">
+
+                        <div *ngFor="let hour of hourlyForecast" class="hourly-item text-center">
+                            <p class="hourly-time">{{ hour.dt * 1000 | date: 'HH:mm' }}</p>
+                            <img [src]="'http://openweathermap.org/img/w/' + hour.weather[0].icon + '.png'" alt="icon">
+                            <p class="hourly-temp">{{ hour.main.temp | number:'1.0-0' }}°C</p>
+                            <p class="hourly-wind">{{ hour.wind.speed | number:'1.0-0' }} km/h</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Message d'attente si aucune donnée météo n'est chargée -->
+        <div *ngIf="!weather" class="alert alert-info text-center mt-3">
+            Loading data... Please enter a city or allow location access.
+        </div>
+    </div>
+</div>
